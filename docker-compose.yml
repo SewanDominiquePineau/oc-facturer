@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: oc-facturer
+    restart: unless-stopped
+    env_file: .env.local
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.facturer.rule=Host(`facturer.zen.local`)"
+      - "traefik.http.routers.facturer.entrypoints=web"
+      - "traefik.http.services.facturer.loadbalancer.server.port=3000"
+
+networks:
+  traefik-network:
+    external: true

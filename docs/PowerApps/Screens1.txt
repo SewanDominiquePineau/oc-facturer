@@ -1,0 +1,1968 @@
+Screens:
+  Validation BDC:
+    Properties:
+      BackgroundImage: =sewan_background
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |-
+        =ClearCollect(
+            clValidation,
+            Filter(
+                'oc_db.bon_de_commande',
+                statut_bdc = 3,
+                date_annulation = Blank()
+            )
+        );
+        ClearCollect(
+            cl_Vue_Contrat_BDC,
+            [
+                {
+                    Categorie: "Tous",
+                    id: 1
+                },
+                {
+                    Categorie: "Sans Contrat",
+                    id: 2
+                },
+                        {
+                    Categorie: "Sans Contrat (+ 1 mois)",
+                    id: 4
+                },
+                {
+                    Categorie: "Déjà Enregistré",
+                    id: 3
+                }
+            ]
+        )
+    Children:
+      - Timer2_1:
+          Control: Timer@2.1.0
+          Properties:
+            AutoPause: =false
+            BorderColor: =ColorFade(Self.Fill, -15%)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Fill, 90%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            Fill: =RGBA(56, 96, 178, 1)
+            Font: =Font.'Open Sans'
+            HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            OnTimerEnd: |-
+              =Refresh('oc_db.ressource');
+              Refresh('oc_db.bon_de_commande')
+            PressedBorderColor: =Self.Fill
+            PressedColor: =Self.Fill
+            PressedFill: =Self.Color
+            Visible: =false
+      - ctn_CMES_NavBack_3:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Fill: =ocColorFacturation
+            Height: =48
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =58
+            X: =18
+            Y: =13
+          Children:
+            - ico_CMES_NavBack_3:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =ocColorFacturation
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Parent.Height
+                  Icon: =Icon.ArrowLeft
+                  OnSelect: |-
+                    =Launch("https://apps.powerapps.com/play/"&AppID_Accueil,{hidenavbar: true},LaunchTarget.Replace)
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Width: =Parent.Width
+            - ico_CMES_NavBack_10:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =ocColorFacturation
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Parent.Height
+                  Icon: =Icon.ArrowLeft
+                  OnSelect: |-
+                    =Launch("https://apps.powerapps.com/play/"&AppID_Accueil,{hidenavbar: true},LaunchTarget.Replace)
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Width: =Parent.Width
+      - ctn_CMES_Client_26:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Height: =35
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =482
+            X: =88
+            Y: =20
+          Children:
+            - txt_CMES_Recherche_7:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  BorderThickness: =0
+                  Default: =""
+                  FocusedBorderThickness: =0
+                  Font: =Font.'Open Sans'
+                  Height: =Parent.Height
+                  HintText: ="Chercher un numéro de ticket/BDC ou nom de client..."
+                  HoverBorderColor: =RGBA(0, 18, 107, 1)
+                  HoverFill: =RGBA(104, 151, 111, 0.05)
+                  PaddingLeft: =15
+                  Width: =Parent.Width
+      - btn_calculMaxCharge_1:
+          Control: Button@0.0.45
+          Properties:
+            OnSelect: =
+            Visible: =false
+            X: =1208
+            Y: =22
+      - ctn_CMES_gal_ressources_7:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Fill: =RGBA(104, 151, 111, 0.05)
+            Height: =269
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =1061
+            X: =52
+            Y: =78
+          Children:
+            - ctn_CMES_gal_Ressources_Header_4:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ocColorFacturation
+                  Height: =43
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lbl_CMES_gal_Ressources_Header_Site_23:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0.4
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Height: =Parent.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        PaddingLeft: =15
+                        Text: ="Signature"
+                        Width: =75
+                  - lbl_CMES_gal_Ressources_Header_Site_24:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        FillPortions: =0.5
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Height: =Parent.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        LayoutMinWidth: =180
+                        PaddingLeft: =15
+                        Text: ="N° de BDC("&gal_ContratBDC.AllItemsCount&")"
+                        Width: =75
+                  - lbl_CMES_gal_Ressources_Header_Site_25:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        FillPortions: =1.5
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Height: =Parent.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        LayoutMinWidth: =210
+                        PaddingLeft: =15
+                        Text: ="Nom du client"
+                        Width: =75
+                  - lbl_CMES_gal_Ressources_Header_Site_26:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        FillPortions: =1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Height: =Parent.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        LayoutMinWidth: =210
+                        PaddingLeft: =15
+                        Text: ="     N° de Contrat"
+                        Width: =75
+                  - lbl_CMES_gal_Ressources_Header_Site_27:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Text: ="Entité Facturation"
+                        Width: =225
+                        X: =611
+            - gal_ContratBDC:
+                Control: Gallery@2.15.0
+                Variant: VariableHeight
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Default: ={}
+                  Height: =227
+                  Items: |-
+                    =Sort(
+                        Search(
+                            Switch(
+                                drp_Vue_Contrat_BDC.Selected.id,
+                                1,
+                                clValidation,
+                                2,
+                                Filter(
+                                    clValidation,
+                                    IsBlank(gdc_contractId) And date_signature > Today() - 45,
+                                    ajout_gdc = 0 Or ajout_gdc = Blank()
+                                ),
+                                4,
+                                Filter(
+                                    clValidation,
+                                    IsBlank(gdc_contractId)
+                                ),
+                                3,
+                                Filter(
+                                    clValidation,
+                                    ajout_gdc = 1
+                                )
+                            ),
+                            txt_CMES_Recherche_7.Text,
+                            numero_bdc,
+                            per_name,
+                            ticket_tipi
+                        ),
+                        date_signature,
+                        SortOrder.Descending
+                    )
+                    /*
+                       "Tous";
+                            "Sans Contrat";
+                            "Déja Enregistré"
+                    If(
+                        (chk_SansContrat.Checked And chk_AttributionRessources_5.Checked);
+                        Filter(
+                            clValidation;
+                            (IsBlank(bdc_gdc_contractId)) Or (bdc_ajout_gdc = Blank() Or bdc_ajout_gdc = 0)
+                        );
+                        !chk_SansContrat.Checked And chk_AttributionRessources_5.Checked;
+                        Filter(
+                            clValidation;
+                            (!IsBlank(bdc_gdc_contractId)) Or (bdc_ajout_gdc = Blank() Or bdc_ajout_gdc = 0)
+                        )
+                    )
+                            clValidation;bdc_ajout_gdc = Blank();
+                            )
+                    Sort(
+                        Search(
+                            Filter(
+                            clValidation;
+                                        If(
+                                    chk_AttributionRessources_5.Checked;
+                                    bdc_ajout_gdc = Blank() Or bdc_ajout_gdc = 0
+                                );
+                            );
+                            txt_CMES_Recherche_7.Text;
+                            bdc_numero_bdc;
+                            bdc_per_name;
+                            bdc_ticket_tipi
+                        );
+                        bdc_date_signature;
+                        SortOrder.Descending
+                    )
+                            Filter(
+                                clValidation;
+                                    bdc_ajout_gdc = Blank() Or bdc_ajout_gdc = 0
+                                );
+                                If(
+                                    chk_SansContrat.Checked;
+                                    gdc_contractId = Blank()
+                                )
+                            );
+                    */
+                  OnSelect: "=Reset(drp_contratGo);\nSet(\n    visConContratBDC,\n    true\n);\nSet(\n    visConContratRessource,\n    false\n);\nSet(\n    BDC_attribution,\n    ThisItem\n);\n/*ClearCollect(\n    cl_RSCattribution;\n    ShowColumns(\n        Filter(\n            'oc_db.ressource';\n            id_commande = BDC_attribution.id_bon_de_commande\n        );\n        id_ressource;\n        adresse_site;\n        nom_site;\n        abo;\n        abo_catalogue;\n        code_produit;\n        fas;\n        fas_catalogue;\n        dynamics_account_id;\n        id_commande;\n        offre_duree;\n        offre_famille;\n        offre_operateur;\n        offre_techno;\n        lien_principal;\n        quantite;\n        site;\n        total_ligne_abo;\n        total_ligne_fas;\n        hors_catalogue;\n        cree_le;\n        modifie_le;\n        cree_par;\n        modifie_par;\n        duree_intitule;\n        upgrade;\n        remplacement;\n        reconduction;\n        ancien_lien;\n        ancien_abo;\n        id_sophia_ancien_lien;\n        total_mensuel;\n        pri_commercial;\n        client_per_name\n    )\n);;\nClearCollect(\n    cl_RSCattributionDPL;\n    ShowColumns(\n        Filter(\n            'oc_db.ressource_dpl';\n            id_commande = BDC_attribution.id_bon_de_commande\n        );\n        id_dpl;\n        id_oc;\n        id_ressource;\n        adresse_site;\n        nom_site;\n        abo;\n        abo_catalogue;\n        code_produit;\n        fas;\n        fas_catalogue;\n        dynamics_account_id;\n        id_commande;\n        offre_duree;\n        offre_famille;\n        offre_operateur;\n        offre_techno;\n        lien_principal;\n        quantite;\n        site;\n        total_ligne_abo;\n        total_ligne_fas;\n        hors_catalogue;\n        cree_le;\n        modifie_le;\n        cree_par;\n        modifie_par;\n        duree_intitule;\n        upgrade;\n        remplacement;\n        reconduction;\n        ancien_lien;\n        ancien_abo;\n        id_sophia_ancien_lien;\n        total_mensuel;\n        pri_commercial;\n        client_per_name\n    )\n);;*/\nSet(\n    var_id_client,\n    LookUp(\n        'oc_db.client',\n        id_client_dynamics = ThisItem.dynamics_account_id\n    )\n);\nSet(\n    GraphQLQuery,\n    \"query useOrganizationQuery($id: ID!) {\\n  organization {\\n    getOrganization(id: $id) {\\n      id\\n      name\\n      type\\n      address {\\n        country\\n        __typename\\n      }\\n      roles {\\n        id\\n        name\\n        permissions {\\n          id\\n          resource\\n          verb\\n          scope\\n          __typename\\n        }\\n        __typename\\n      }\\n      parentHierarchy {\\n        id\\n        name\\n        type\\n        __typename\\n      }\\n      livePerId\\n      parentOrganizationId\\n      services {\\n        id\\n        name\\n        __typename\\n      }\\n      timezone\\n      locale\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\n);\nSet(\n    GraphQLVariables,\n    \"{\n        \"\"id\"\":\"\"\" & var_id_client.id_sophia_go & \"\"\" \n    }\"\n);\nSet(\n    GraphQLBody,\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\n  \"\"variables\"\": \" & GraphQLVariables & \"\n}\"\n);\nSet(\n    GraphQLResult,\n    GraphQL.Run(GraphQLBody).reponse\n);\nSet(\n    varJson,\n    ParseJSON(GraphQLResult)\n);\nIf(\n    !IsBlank(varJson.errors),\n    Set(\n        var_cnt_search_orga,\n        true\n    ),\n    Set(\n        var_cnt_search_orga,\n        false\n    )\n);\n//ClearCollect(colJson;jso  JSON(GraphQLResult));;\nIf(\n    IsBlank(ThisItem.gdc_contractId),\n    Set(\n        varLastBDC,\n        First(\n            Sort(\n                Filter(\n                    'oc_db.bon_de_commande',\n                    dynamics_account_id = Text(gal_ContratBDC.Selected.dynamics_account_id),\n                    gdc_contractId <> Blank()\n                ),\n                date_signature\n            )\n        )\n    );\n    Patch(\n        'oc_db.bon_de_commande',\n        {\n            /*id_sophia_go_facturation: Text(\n                LookUp(\n                    'oc_db.entite';\n                    id_entite = ThisItem.id_entite_facturation\n                ).id_sophia_go\n            );\n            nom_sophia_facturation: Text(\n                LookUp(\n                    'oc_db.entite';\n                    id_entite = ThisItem.id_entite_facturation\n                ).nom_sophia_go\n            );*/\n            id_bon_de_commande: gal_ContratBDC.Selected.id_bon_de_commande,\n            gdc_contractId: varLastBDC.gdc_contractId,\n            gdc_contractName: varLastBDC.gdc_contractName,\n            gdc_invoicedEntityId: varLastBDC.gdc_invoicedEntityId,\n            id_sophia_go_facturation: varLastBDC.id_sophia_go_facturation,\n            nom_sophia_facturation: varLastBDC.nom_sophia_facturation\n            /*            gdc_contractId: Text(\n                LookUp(\n                    'oc_db.bon_de_commande';\n                    dynamics_account_id = Text(ThisItem.dynamics_account_id) And gdc_contractId <> Blank()\n                ).gdc_contractId\n            );*/\n        }\n    );\n    Set(\n        GraphQLQuery,\n        \"query Organizations($organizationId: ID!) {\\n  organization {\\n    getOrganizations(parentOrganizationId: $organizationId) {\\n      edges {\\n        id\\n        name\\n        type\\n        internalReference\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\n    );\n    Set(\n        GraphQLVariables,\n        \"{\"\"organizationId\"\":\"\"\" & Text(ThisItem.id_sophia_go_facturation) & \"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":50}}\"\n    );\n    Set(\n        GraphQLBody,\n        \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\n  \"\"variables\"\": \" & GraphQLVariables & \"\n}\"\n    );\n    Set(\n        GraphQLResult,\n        GraphQL.Run(GraphQLBody).reponse\n    );\n    Set(\n        varJson,\n        ParseJSON(GraphQLResult)\n    );\n    ClearCollect(\n        colOrganizations,\n        Table(\n            ForAll(\n                varJson.data.organization.getOrganizations.edges,\n                {\n                    id: ThisRecord.id,\n                    name: ThisRecord.name,\n                    type: ThisRecord.type,\n                    internalReference: ThisRecord.internalReference\n                }\n            )\n        )\n    );\n    Set(\n        vuEntite,\n        If(\n            CountRows(colOrganizations) > 1,\n            true,\n            false\n        )\n    );\n    ClearCollect(cl_ContratGO,{});\n    ClearCollect(\n    cl_ContratGO2,\n            {\n                id: varLastBDC.gdc_contractId,\n                contractNumber: varLastBDC.gdc_contractName,\n                status: \"\",\n                clientid: varLastBDC.id_sophia_go_facturation,\n                clientname: varLastBDC.nom_sophia_facturation\n            }\n)\n    \n);\n"
+                  TemplatePadding: =0
+                  TemplateSize: =29
+                  Width: =1061
+                  Y: =43
+                Children:
+                  - Container9_1:
+                      Control: GroupContainer@1.4.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =25
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width
+                      Children:
+                        - lbl_CMES_gal_Ressources_SiteNom_8:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.4
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =25
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnSelect: =Select(gal_ContratBDC);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_23.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_23.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_23.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_23.PaddingTop
+                              Size: =10
+                              Text: =Text(ThisItem.date_signature,"dd/mm/yy")
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_23.Width
+                              Wrap: =false
+                              X: =lbl_CMES_gal_Ressources_Header_Site_23.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_23.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_9:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =25
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_24.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_24.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_24.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_24.PaddingTop
+                              Size: =10
+                              Text: |-
+                                =ThisItem.
+                                numero_bdc
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_24.Width
+                              Wrap: =false
+                              X: =lbl_CMES_gal_Ressources_Header_Site_24.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_24.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_10:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =1.7
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =25
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =200
+                              OnSelect: |-
+                                =Select(gal_ContratBDC);
+                                Set(visConContratBDC,true);
+                                Set(visConContratRessource,false);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_25.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_25.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_25.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_25.PaddingTop
+                              Size: =10
+                              Text: =ThisItem.per_name
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_25.Width
+                              Wrap: =false
+                              X: =lbl_CMES_gal_Ressources_Header_Site_25.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_25.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_11:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =25
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: =Select(gal_ContratBDC);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_26.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_26.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_26.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_26.PaddingTop
+                              Size: =10
+                              Text: =ThisItem.gdc_contractName
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_26.Width
+                              Wrap: =false
+                              X: =lbl_CMES_gal_Ressources_Header_Site_26.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_26.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_13:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =25
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: =Select(gal_ContratBDC);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_26.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_26.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_26.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_26.PaddingTop
+                              Size: =10
+                              Text: =ThisItem.nom_sophia_facturation
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_26.Width
+                              Wrap: =false
+                              X: =lbl_CMES_gal_Ressources_Header_Site_26.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_26.Y
+                        - CheckboxVU_1:
+                            Control: CheckBox@0.0.30
+                            Properties:
+                              Checked: =If(ThisItem.ajout_gdc = Blank() Or ThisItem.ajout_gdc =0,false,true)
+                              Label: =
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnCheck: |+
+                                =/** ClearCollect(
+                                    colRessourcesAG;
+                                    Filter(
+                                        'oc_db.ressource_dpl';
+                                        id_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                                    )
+                                );;
+
+                                ForAll(
+                                    colRessourcesAG;
+                                    Patch(
+                                        'oc_db.ressource_dpl';
+                                        ThisRecord;
+                                        { gdc_hidden: !ThisItem.ajout_gdc }
+                                    )
+                                );;
+                                **/
+                                Patch(
+                                    'oc_db.bon_de_commande',
+                                    LookUp(
+                                        'oc_db.bon_de_commande',
+                                        id_bon_de_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                                    ),
+                                    {ajout_gdc: !ThisItem.ajout_gdc}
+                                );
+                                Patch(
+                                    clValidation,
+                                    LookUp(
+                                        clValidation,
+                                        id_bon_de_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                                    ),
+                                    {ajout_gdc: !ThisItem.ajout_gdc}
+                                )
+
+
+
+                              OnUncheck: |+
+                                =/**
+                                ClearCollect(
+                                    colRessourcesAG;
+                                    Filter(
+                                        'oc_db.ressource_dpl';
+                                        id_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                                    )
+                                );;
+
+                                ForAll(
+                                    colRessourcesAG;
+                                    Patch(
+                                        'oc_db.ressource_dpl';
+                                        ThisRecord;
+                                        { gdc_hidden: !ThisItem.ajout_gdc }
+                                    )
+                                );;
+                                **/
+
+                                Patch(
+                                    'oc_db.bon_de_commande',
+                                    LookUp(
+                                        'oc_db.bon_de_commande',
+                                        id_bon_de_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                                    ),
+                                    {ajout_gdc: !ThisItem.ajout_gdc}
+                                );
+                                Patch(
+                                    clValidation,
+                                    LookUp(
+                                        clValidation,
+                                        id_bon_de_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                                    ),
+                                    {ajout_gdc: !ThisItem.ajout_gdc}
+                                )
+
+
+
+                              Width: =40
+                  - Rectangle11_2:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Fill: =ocColorFacturation
+                        Height: =1
+                        OnSelect: =Select(gal_ContratBDC);
+                        Width: =Parent.Width
+                        Y: =26
+      - ContContratBDC:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Height: =658
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: =visConContratBDC
+            Width: =219
+            X: =1134
+            Y: =78
+          Children:
+            - txtContratVal:
+                Control: TextInput@0.0.54
+                Properties:
+                  Height: =30
+                  Value: =gal_ContratBDC.Selected.contrat_cadre
+                  Width: =141
+                  X: =12
+                  Y: =50
+            - Icon26_1:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =26
+                  Icon: =Icon.Search
+                  OnSelect: |-
+                    =Set(
+                        GraphQLQuery,
+                        "query Contracts($organizationId: UUID!, $pagination: Pagination, $status: [ContractStatus!], $period: Period, $search: String, $sort: [ContractSortItem!]) {\n  contract {\n    list(\n      organizationId: $organizationId\n      pagination: $pagination\n      status: $status\n      period: $period\n      search: $search\n      sort: $sort\n    ) {\n      edges {\n        id\n        contractNumber\n        lastUpdate\n        status\n        client {\n          id\n          name\n          internalReference\n          __typename\n        }\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                    );
+                    Set(
+                        GraphQLVariables,
+                        "{""organizationId"":""8f19e50e-1be4-48b7-8c2a-6d0c477ff141"",""pagination"":{""page"":1,""limit"":25},""status"":[],""period"":{},""search"":""" & txtContratVal.Value & """,""sort"":[{""id"":""name"",""desc"":false}]}"
+                    );
+                    Set(
+                        GraphQLBody,
+                        "{""query"": """ & GraphQLQuery & """ ,
+                      ""variables"": " & GraphQLVariables & "
+                    }"
+                    );
+                    Set(
+                        GraphQLResult,
+                        GraphQL.Run(GraphQLBody).reponse
+                    );
+                    Set(
+                        varJson,
+                        ParseJSON(GraphQLResult)
+                    );
+                    /*
+                    ClearCollect(
+                        MyCollection;
+                        ShowColumns(
+                            Filter(
+                                ForAll(
+                                    Table(varJson.data.search.search.edges);
+                                    With(
+                                        {
+                                            record: Value;
+                                            breadcrumbNamesList: ForAll(
+                                                Table(record.breadcrumbNames);
+                                                Text(Value)
+                                            )
+                                        };
+                                        {
+                                            id: Text(record.id);
+                                            name: Text(record.name);
+                                            category: Text(record.category);
+                                            breadcrumbNames: breadcrumbNamesList
+                                        }
+                                    )
+                                );
+                                category = "organization" && CountIf(breadcrumbNames; Value = "Sewan Entreprise") > 0
+                            );
+                            "id";
+                            "name"
+                        )
+                    )
+                    */
+                    /*
+                        ClearCollect(
+                            cl_Organization;
+                            ForAll(
+                                Table(varJson.data.search.search.edges);
+                                {
+                                    id: Value.id;
+                                    name: Value.name;
+                                    type: Value.type;
+                                    category: Value.category;
+                                    breadcrumbNames: Concat(Value.breadcrumbNames;Value;" > ")
+                                }
+                            )
+                        );;
+                        */
+
+
+
+                    ClearCollect(
+                        cl_ContratGO,
+                        ForAll(
+                            Table(varJson.data.contract.list.edges),
+                            With(
+                                {
+                                    id: ThisRecord.Value.id,
+                                    contractNumber: ThisRecord.Value.contractNumber & " - " & ThisRecord.Value.client.name,
+                                    status: ThisRecord.Value.status,
+                                    clientid: ThisRecord.Value.client.id,
+                                    clientname: ThisRecord.Value.client.name
+                                },
+                                {
+                                    id: id,
+                                    contractNumber: contractNumber,
+                                    status: status,
+                                    clientid: clientid,
+                                    clientname: clientname
+                                }
+                            )
+                        )
+                    )
+                  Width: =35
+                  X: =171
+                  Y: =50
+            - drp_contratGo:
+                Control: Classic/DropDown@2.3.1
+                Properties:
+                  AllowEmptySelection: =true
+                  BorderColor: =ocColorFacturation
+                  ChevronBackground: =ocColorFacturation
+                  ChevronFill: =RGBA(255, 255, 255, 1)
+                  ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                  ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                  Default: =First(cl_ContratGO).contractNumber
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  Height: =25
+                  HoverFill: =Self.SelectionFill
+                  Items: =cl_ContratGO
+                  Items.Value: =contractNumber
+                  OnChange: =
+                  PressedColor: =RGBA(0, 0, 0, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  SelectionColor: =RGBA(0, 0, 0, 1)
+                  SelectionFill: =RGBA(104, 151, 111, 0.19)
+                  Size: =10
+                  Width: =161
+                  X: =12
+                  Y: =101
+            - ico_enreg_client_3:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =31
+                  Icon: =Icon.Save
+                  OnSelect: |
+                    =Patch(
+                        'oc_db.entite',
+                        LookUp(
+                            'oc_db.entite',
+                            id_entite = gal_ContratBDC.Selected.id_entite_facturation
+                        ),
+                        {
+                            id_sophia_go: Text(drp_contratGo.Selected.clientid),
+                            nom_sophia_go: Text(drp_contratGo.Selected.clientname)
+                        }
+                    );
+                    Set(
+                        GraphQLQuery,
+                        "query Organizations($organizationId: ID!) {\n  organization {\n    getOrganizations(parentOrganizationId: $organizationId) {\n      edges {\n        id\n        name\n        type\n        internalReference\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                    );
+                    Set(
+                        GraphQLVariables,
+                        "{""organizationId"":""" & Text(drp_contratGo.Selected.clientid) & """,""pagination"":{""page"":1,""limit"":50}}"
+                    );
+                    Set(
+                        GraphQLBody,
+                        "{""query"": """ & GraphQLQuery & """ ,
+                      ""variables"": " & GraphQLVariables & "
+                    }"
+                    );
+                    Set(
+                        GraphQLResult,
+                        GraphQL.Run(GraphQLBody).reponse
+                    );
+                    Set(
+                        varJson,
+                        ParseJSON(GraphQLResult)
+                    );
+                    ClearCollect(
+                        colOrganizations,
+                        Table(
+                            ForAll(
+                                varJson.data.organization.getOrganizations.edges,
+                                {
+                                    id: ThisRecord.id,
+                                    name: ThisRecord.name,
+                                    type: ThisRecord.type,
+                                    internalReference: ThisRecord.internalReference
+                                }
+                            )
+                        )
+                    );
+                    Set(
+                        vuEntite,
+                        If(
+                            CountRows(colOrganizations) > 1,
+                            true,
+                            false
+                        )
+                    );
+                    If(
+                        Not(vuEntite),
+                        Patch(
+                            'oc_db.bon_de_commande',
+                            {
+                                id_bon_de_commande: gal_ContratBDC.Selected.id_bon_de_commande,
+                                gdc_contractId: Text(drp_contratGo.Selected.id),
+                                gdc_invoicedEntityId: Text(drp_contratGo.Selected.clientid),
+                                gdc_contractName: Text(drp_contratGo.Selected.contractNumber),
+                                id_sophia_go_facturation: Text(drp_contratGo.Selected.clientid),
+                                nom_sophia_facturation: Text(drp_contratGo.Selected.clientname)
+                            }
+                        );
+                        Patch(
+                            clValidation,
+                            LookUp(
+                                clValidation,
+                                id_bon_de_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                            ),
+                            {
+                                gdc_contractId: Text(drp_contratGo.Selected.id),
+                                gdc_invoicedEntityId: Text(drp_contratGo.Selected.clientid),
+                                gdc_contractName: Text(drp_contratGo.Selected.contractNumber),
+                                id_sophia_go_facturation: Text(drp_contratGo.Selected.clientid),
+                                nom_sophia_facturation: Text(drp_contratGo.Selected.clientname)
+                            }
+                        )
+                    );
+                  Width: =30
+                  X: =183
+                  Y: =101
+            - Label21:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =ocColorFacturation
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =37
+                  Text: ="Contrat"
+                  Width: =219
+            - TextCanvas16_2:
+                Control: Text@0.0.51
+                Properties:
+                  Height: =101
+                  Text: |-
+                    =drp_contratGo.Selected.clientname &  Char(10) & drp_contratGo.Selected.id & Char(10) & "Statut: " & drp_contratGo.Selected.status
+                  VerticalAlign: =VerticalAlign.Top
+                  Width: =194
+                  X: =12
+                  Y: =143
+            - Icon9:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =30
+                  Icon: =Icon.Add
+                  OnSelect: =Launch("https://sophia3.sewan.fr/go/admin/contracts/8f19e50e-1be4-48b7-8c2a-6d0c477ff141/create-contract")
+                  Width: =30
+                  X: =183
+                  Y: =132
+            - drp_contratGo_Entite:
+                Control: Classic/DropDown@2.3.1
+                Properties:
+                  AllowEmptySelection: =true
+                  BorderColor: =ocColorFacturation
+                  ChevronBackground: =ocColorFacturation
+                  ChevronFill: =RGBA(255, 255, 255, 1)
+                  ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                  ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                  Default: =false
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  Height: =25
+                  HoverFill: =Self.SelectionFill
+                  Items: =colOrganizations
+                  Items.Value: =name
+                  OnChange: =
+                  PressedColor: =RGBA(0, 0, 0, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  SelectionColor: =RGBA(0, 0, 0, 1)
+                  SelectionFill: =RGBA(104, 151, 111, 0.19)
+                  Size: =10
+                  Visible: =vuEntite
+                  Width: =161
+                  X: =12
+                  Y: =271
+            - ico_enreg_client_6:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =31
+                  Icon: =Icon.Save
+                  OnSelect: |+
+                    =Patch(
+                        'oc_db.bon_de_commande',
+                        {
+                            id_bon_de_commande: gal_ContratBDC.Selected.id_bon_de_commande,
+                            gdc_contractId: Text(drp_contratGo.Selected.id),
+                            gdc_invoicedEntityId: Text(drp_contratGo_Entite.Selected.id),
+                            gdc_contractName: Text(drp_contratGo.Selected.contractNumber),
+                            id_sophia_go_facturation: Text(drp_contratGo.Selected.clientid),
+                            nom_sophia_facturation: Text(drp_contratGo_Entite.Selected.name)
+                        }
+                    );
+
+                    Patch(
+                        clValidation,
+                        LookUp(
+                            clValidation,
+                            id_bon_de_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                        ),
+                        {
+                            gdc_contractId: Text(drp_contratGo.Selected.id),
+                            gdc_invoicedEntityId: Text(drp_contratGo_Entite.Selected.id),
+                            gdc_contractName: Text(drp_contratGo.Selected.contractNumber),
+                            id_sophia_go_facturation: Text(drp_contratGo.Selected.clientid),
+                            nom_sophia_facturation: Text(drp_contratGo_Entite.Selected.name)
+                        }
+                    );
+
+                  Visible: =vuEntite
+                  Width: =30
+                  X: =183
+                  Y: =268
+      - lbl_ADV_FiltreCommercial_4:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingRight: =10
+            Size: =12
+            Text: ="Bon de commande :"
+            Width: =200
+            X: =62
+            Y: =347
+      - ButtonCanvas12_1:
+          Control: Button@0.0.45
+          Properties:
+            Align: =Align.Left
+            Appearance: ='ButtonCanvas.Appearance'.Transparent
+            BasePaletteColor: =ocColorFacturation
+            FontSize: =14
+            FontUnderline: =true
+            Height: =22
+            OnSelect: =Launch("https://itsgroupsts.sharepoint.com/sites/Dynamics365SEWAN-CRM"&gal_ContratBDC.Selected.opportunite_path&"/"&gal_ContratBDC.Selected.file_name&"_signé.pdf")
+            Text: =gal_ContratBDC.Selected.file_name&"_signé.pdf"
+            Visible: =!IsBlank(gal_ContratBDC.Selected)
+            Width: =850
+            X: =273
+            Y: =351
+      - ctn_CMES_gal_ressources_8:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Fill: =RGBA(104, 151, 111, 0.05)
+            Height: =287
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =1061
+            X: =52
+            Y: =437
+          Children:
+            - Container8_1:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ocColorFacturation
+                  Height: =40
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lbl_CMES_gal_Ressources_Header_Site_28:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =3.2
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        PaddingLeft: =15
+                        Text: ="Ressources ("&gal_ContrtatRessource.AllItemsCount&")"
+                        Width: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_34:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Text: ="Qté"
+                        Width: =154
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_29:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =70
+                        Text: ="Code produit"
+                        Width: =80
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_30:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Text: ="Abo"
+                        Width: =154
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_31:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Start
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Text: ="FAS"
+                        Width: =225
+                        X: =611
+                  - lbl_CMES_gal_Ressources_Header_Site_32:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =2
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        Text: ="Site / Site Sophia"
+                        Width: =80
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_33:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =60
+                        Text: ="Go"
+                        Width: =80
+                        X: =456
+            - gal_ContrtatRessource:
+                Control: Gallery@2.15.0
+                Variant: VariableHeight
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Default: ={}
+                  Height: =Parent.Height - Container8_1.Height
+                  Items: |-
+                    =If(
+                        !IsBlank(gal_ContratBDC.Selected),
+                        Sort(
+                            Filter(
+                                'oc_db.ressource_dpl',
+                                id_commande = gal_ContratBDC.Selected.id_bon_de_commande
+                            ),
+                            offre_operateur,
+                            SortOrder.Ascending
+                        )
+                    )
+                  OnSelect: |-
+                    =Set(visConContratBDC,false);
+                    Set(visConContratRessource,true);
+
+                    If(
+                        IsBlank(ThisItem.id_site_sophia_go),
+                        Patch(
+                            'oc_db.ressource_dpl',
+                            ThisItem,
+                            {
+                                id_site_sophia_go: LookUp(
+                                    'oc_db.site',
+                                    id_site = ThisItem.site
+                                ).id_sophia_go
+                            }
+                        )
+                    );
+                    Set(testText, "toto")
+                  TemplatePadding: =0
+                  TemplateSize: =40
+                  Width: =Parent.Width
+                  Y: =40
+                Children:
+                  - Container10_1:
+                      Control: GroupContainer@1.4.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Height: =40
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        PaddingRight: =10
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width
+                      Children:
+                        - lbl_CMES_gal_Ressources_SiteNom_17:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Right
+                              AlignInContainer: =AlignInContainer.Center
+                              AutoHeight: =true
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.2
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =29
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =15
+                              OnSelect: |-
+                                =Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingBottom
+                              PaddingLeft: =0
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingTop
+                              Size: =7
+                              Text: =If(ThisItem.remplacement = 1, "Rp",ThisItem.reconduction = 1, "Rc",ThisItem.upgrade = 1,"Up","")
+                              Tooltip: =If(ThisItem.remplacement = 1, "Remplacement",ThisItem.reconduction = 1, "Reconduction",ThisItem.upgrade = 1,"Upgrade","")
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_28.Width
+                              X: =lbl_CMES_gal_Ressources_Header_Site_28.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_28.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_12:
+                            Control: Label@2.5.1
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              AutoHeight: =true
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =3
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =200
+                              OnSelect: |-
+                                =Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingTop
+                              Size: =9
+                              Text: =ThisItem.offre_operateur & If(ThisItem.J2_date_CMES <> Blank(),"(Livré)","")  & Char(13) & ThisItem.gdc_productName
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_28.Width
+                              X: =lbl_CMES_gal_Ressources_Header_Site_28.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_28.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_18:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnSelect: |-
+                                =Select(gal_ContrtatRessource);
+                                Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_30.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_29.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingTop
+                              Size: =10
+                              Text: =ThisItem.quantite
+                              Tooltip: =Substitute(ThisItem.code_produit,"F/M","M")
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_29.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_28.Y
+                        - TextInputCanvas8:
+                            Control: TextInput@0.0.54
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              FillPortions: =1
+                              FontSize: =11
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnChange: =Patch('oc_db.ressource_dpl',ThisItem,{code_produit:TextInputCanvas8.Value})
+                              Value: =ThisItem.code_produit
+                        - lbl_CMES_gal_Ressources_SiteNom_16:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnSelect: |-
+                                =Select(gal_ContrtatRessource);
+                                Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_30.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_29.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingTop
+                              Size: =10
+                              Text: =ThisItem.abo
+                              Tooltip: =Substitute(ThisItem.code_produit,"F/M","M")
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_29.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_28.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_15:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnSelect: |-
+                                =Select(gal_ContrtatRessource);
+                                Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_30.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_29.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_28.PaddingTop
+                              Size: =10
+                              Text: =ThisItem.fas
+                              Tooltip: =Substitute(ThisItem.code_produit,"F/M","F")
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_29.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_28.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_14:
+                            Control: Label@2.5.1
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =2
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =35
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =100
+                              OnSelect: "=Select(gal_ContrtatRessource);\nSet(\n    visConContratBDC,\n    false\n);\nSet(\n    visConContratRessource,\n    true\n);\nSet(\n    GraphQLQuery,\n    \"query ProductsByString($organizationId: UUID!, $search: String) {\\n  contract {\\n    searchProducts(organizationId: $organizationId, search: $search) {\\n      serviceId\\n      serviceName\\n      productName\\n      categoryId\\n      subCategoryName\\n      eventType\\n      catalogRef\\n      unit\\n      price\\n      SAF\\n      connectedReferences {\\n        productName\\n        subCategoryName\\n        eventType\\n        catalogRef\\n        unit\\n        price\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\n);\nSet(\n    GraphQLVariables,\n    \"{\"\"organizationId\"\":\"\"8f19e50e-1be4-48b7-8c2a-6d0c477ff141\"\",\"\"search\"\":\"\"\" & Substitute(\n        ThisItem.code_produit,\n        \"F/M\",\n        \"M\"\n    ) & \"\"\"}\"\n);\nSet(\n    GraphQLBody,\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\n  \"\"variables\"\": \" & GraphQLVariables & \"\n}\"\n);\nSet(\n    GraphQLResult,\n    GraphQL.Run(GraphQLBody).reponse\n);\nSet(\n    varJsonProduct,\n    ParseJSON(GraphQLResult)\n);\nSet(\n    varProduct,\n    First(Table(varJsonProduct.data.contract.searchProducts))\n);\nPatch(\n    'oc_db.ressource_dpl',\n    ThisItem,\n    {\n        gdc_serviceId: Text(varProduct.Value.serviceId),\n        gdc_categoryId: Text(varProduct.Value.categoryId),\n        gdc_catalogRef: Text(varProduct.Value.catalogRef),\n        gdc_productName: Text(varProduct.Value.productName)\n    }\n);\n/*\nSet(\n    GraphQLQuery;\n    \"    query useOrganizationQuery($perId: String!){\n    organization {\n      getOrganizationFromLive(perId: $perId) {\n          id\n          name\n          livePerId\n        }\n      }\n    }\"\n);;\n*/\nIf(\n    IsBlank(ThisItem.id_site_sophia_go),\n    Set(\n        GraphQLQuery,\n        \"query useOrganizationQuery($perId: String!){\n    site {\n      getSiteFromLive(perId: $perId) {\n          id\n          name\n          livePerId\n        }\n      }\n    }\"\n    );\n    Set(\n        var_tmp_site,\n        LookUp(\n            'oc_db.site',\n            id_site = ThisItem.site\n        )\n    );\n    If(\n        Not IsBlank(var_tmp_site.id_sophia_go),\n        Patch(\n            'oc_db.ressource_dpl',\n            ThisItem,\n            {id_site_sophia_go: var_tmp_site.id_sophia_go}\n        ),\n        Set(\n            GraphQLVariables,\n            \"{\n          \"\"perId\"\":\"\"\" & Text(var_tmp_site.per_id) & \"\"\"\n        }\"\n        );\n        Set(\n            GraphQLBody,\n            \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\n        \"\"variables\"\": \" & GraphQLVariables & \"}\"\n        );\n        Set(\n            GraphQLResult,\n            GraphQL.Run(GraphQLBody).reponse\n        );\n        Set(\n            varJsonidGo,\n            ParseJSON(GraphQLResult)\n        );\n        Patch(\n            'oc_db.ressource_dpl',\n            ThisItem,\n            {id_site_sophia_go: Text(varJsonidGo.data.site.getSiteFromLive.id)}\n        );\n        Patch(\n            'oc_db.site',\n            var_tmp_site,\n            {site_nom_sophia: Text(varJsonidGo.data.site.getSiteFromLive.name)}\n        );\n    )\n);\nIf(\n    Not IsBlank(ThisItem.id_site_sophia_go),\n    Set(\n        varSiteSearch,\n        LookUp(\n            'oc_db.site',\n            id_site = ThisItem.site\n        ).site_nom_sophia\n    );\n    Set(\n        GraphQLQuery,\n        \"query TableSites($organizationId: ID!, $filters: SiteFilters, $pagination: Pagination) {\\n  site {\\n    getSites(\\n      organizationId: $organizationId\\n      pagination: $pagination\\n      filters: $filters\\n    ) {\\n      edges {\\n        id\\n        name\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\n    );\n    Set(\n        GraphQLVariables,\n        \"{\"\"organizationId\"\":\"\"\" & gal_ContratBDC.Selected.id_sophia_go_facturation & \"\"\",\"\"filters\"\":{\"\"textSearch\"\":\"\"\" & varSiteSearch & \"\"\"},\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":200}}\"\n    );\n    Set(\n        GraphQLBody,\n        \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\n  \"\"variables\"\": \" & GraphQLVariables & \"\n}\"\n    );\n    Set(\n        CountvarJson,\n        CountRows(\n            ForAll(\n                Table(ParseJSON(GraphQL.Run(GraphQLBody).reponse)),\n                ThisRecord\n            )\n        )\n    );\n    \n)\n/*\nSet(varSiteSearch;\nIf(\n    Not IsBlank(ThisItem.id_site_sophia_go);\n    LookUp(\n        'oc_db.site';\n        id_site = ThisItem.site\n    ).site_nom_sophia;\n    \"\"\n));;\nSet(\n    GraphQLQuery;\n    \"query TableSites($organizationId: ID!, $filters: SiteFilters, $pagination: Pagination) {\\n  site {\\n    getSites(\\n      organizationId: $organizationId\\n      pagination: $pagination\\n      filters: $filters\\n    ) {\\n      edges {\\n        id\\n        name\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\n);;\nSet(\n    GraphQLVariables;\n    \"{\"\"organizationId\"\":\"\"\" & gal_ContratBDC.Selected.id_sophia_go_facturation & \"\"\",\"\"filters\"\":{\"\"textSearch\"\":\"\"\" & txtSeachContratSite.Value & \"\"\"},\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":200}}\"\n);;\nSet(\n    GraphQLBody;\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\n  \"\"variables\"\": \" & GraphQLVariables & \"\n}\"\n);;\nSet(\n    GraphQLResult;\n    GraphQL.Run(GraphQLBody).reponse\n);;\nSet(\n    varJson;\n    ParseJSON(GraphQLResult)\n);;\nset(CountvarJson;CountRows(\n    ForAll(\n        Table(ParseJSON(varJson));\n        ThisRecord\n    )\n));;\n*/"
+                              PaddingBottom: =0
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_30.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_29.PaddingRight
+                              PaddingTop: =0
+                              Size: =9
+                              Text: |-
+                                =ThisItem.nom_site & Char(13) & If(
+                                    Not IsBlank(ThisItem.id_site_sophia_go),
+                                    LookUp(
+                                        'oc_db.site',
+                                        id_site = ThisItem.site
+                                    ).site_nom_sophia,
+                                    ""
+                                )
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_29.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_28.Y
+                        - bt_del_article:
+                            Control: Button@0.0.45
+                            Properties:
+                              Align: =Align.Center
+                              BasePaletteColor: =RGBA(156, 220, 79, 1)
+                              BorderRadiusBottomLeft: =10
+                              BorderRadiusBottomRight: =10
+                              BorderRadiusTopLeft: =10
+                              BorderRadiusTopRight: =10
+                              FontColor: =RGBA(255, 255, 255, 1)
+                              Height: =25
+                              Icon: ="Delete"
+                              Layout: ='ButtonCanvas.Layout'.IconBefore
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: |
+                                =Set(
+                                    GraphQLQuery,
+                                    "mutation removeArticles($ids: [UUID!]!) {\n  contract {\n    deleteArticles(ids: $ids)\n    __typename\n  }\n}\n"
+                                );
+                                /*
+                                {"operationName":"removeArticles","variables":{"ids":["a626f3ca-84aa-4f1d-894a-af9cbdd1f9de"]},"query":"mutation removeArticles($ids: [UUID!]!) {\n  contract {\n    deleteArticles(ids: $ids)\n    __typename\n  }\n}\n"}
+                                */
+                                Set(
+                                    GraphQLVariables,
+                                    " {""ids"":[""" & ThisItem.gdc_id_product & """]
+                                    }"
+                                );
+                                Set(
+                                    GraphQLBody,
+                                    "{""query"": """ & GraphQLQuery & """ ,
+                                  ""variables"": " & GraphQLVariables & "
+                                }"
+                                );
+                                Set(
+                                    GraphQLResult,
+                                    GraphQL.Run(GraphQLBody).reponse
+                                );
+                                /*
+                                Réponse
+                                {
+                                    "data": {
+                                        "contract": {
+                                            "addArticles": [
+                                                {
+                                                    "id": "16eb0111-4bc8-462a-bea9-d5a1a41d4de4",
+                                                    "__typename": "ContractArticle"
+                                                }
+                                            ],
+                                            "__typename": "ContractMutation"
+                                        }
+                                    }
+                                }
+                                */
+                                Set(
+                                    varJson,
+                                    ParseJSON(GraphQLResult)
+                                );
+                                Patch(
+                                    'oc_db.ressource_dpl',
+                                    ThisItem,
+                                    {gdc_id_product: Blank()}
+                                );
+                              PaddingBottom: =5
+                              PaddingLeft: =5
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              Text: =
+                              VerticalAlign: =VerticalAlign.Middle
+                              Visible: =!IsBlank(ThisItem.gdc_id_product)
+                              X: =736
+                              Y: =52
+                        - bt_add_article:
+                            Control: Button@0.0.45
+                            Properties:
+                              Align: =Align.Left
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =RGBA(156, 220, 79, 1)
+                              BorderRadiusBottomLeft: =10
+                              BorderRadiusBottomRight: =10
+                              BorderRadiusTopLeft: =10
+                              BorderRadiusTopRight: =10
+                              DisplayMode: |-
+                                =If(
+                                    !IsBlank(gal_ContratBDC.Selected.gdc_contractId) And !IsBlank(ThisItem.gdc_serviceId) And !IsBlank(ThisItem.id_site_sophia_go) And !IsBlank(gal_ContratBDC.Selected.gdc_invoicedEntityId) And !IsBlank(ThisItem.gdc_catalogRef) And !IsBlank(ThisItem.gdc_categoryId) And IsBlank(ThisItem.gdc_id_product),
+                                    DisplayMode.Edit,
+                                    DisplayMode.Disabled
+                                )
+                              FillPortions: =0.1
+                              FontColor: =RGBA(255, 255, 255, 1)
+                              Height: =25
+                              Layout: ='ButtonCanvas.Layout'.IconBefore
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnSelect: |
+                                =If(
+                                    !IsBlank(ThisItem.J0_id_sophia),
+                                    Set(
+                                        var_tmp_site,
+                                        LookUp(
+                                            'oc_db.site',
+                                            id_site = ThisItem.site
+                                        )
+                                    );
+                                    Set(
+                                        var_link_ressource,
+                                        ",
+                                                ""resourceLink"":""" & "https://sophia3.sewan.fr/p" & var_tmp_site.per_id & "/access_links?form_id=" & ThisItem.J0_id_sophia & """,
+                                                ""resourceLinkName"": """ & ThisItem.J0_id_sophia & """"
+                                    ),
+                                    Set(
+                                        var_link_ressource,
+                                        ""
+                                    )
+                                );
+                                Set(
+                                    varMontantFAS,
+                                     """SAF"": 0,"
+                                );
+                                Set(
+                                    varMontantAMOUNT,
+                                    """amount"": 0,"
+                                );
+                                If(
+                                    gal_ContrtatRessource.Selected.fas <> 0,
+                                    Set(varMontantFAS , """SAF"": " & Substitute(
+                                        gal_ContrtatRessource.Selected.fas,
+                                        ",",
+                                        "."
+                                    ) & ",")
+                                );
+                                If(
+                                    gal_ContrtatRessource.Selected.abo <> 0,
+                                    Set(varMontantAMOUNT ,  """amount"": " & Substitute(
+                                        gal_ContrtatRessource.Selected.abo,
+                                        ",",
+                                        "."
+                                    ) & ",")
+                                );
+                                Set(
+                                    GraphQLQuery,
+                                    "mutation createArticles($contractId: UUID!, $articles: [ContractArticlesInput!]!) {\n  contract {\n    addArticles(contractId: $contractId, articles: $articles) {\n      id\n      __typename\n    }\n    __typename\n  }\n}\n"
+                                );
+                                Set(
+                                    GraphQLVariables,
+                                    " {
+                                        ""contractId"": """ & gal_ContratBDC.Selected.gdc_contractId & """,
+                                        ""articles"": [
+                                            {
+                                                ""serviceId"": """ & gal_ContrtatRessource.Selected.gdc_serviceId & """,
+                                                ""concernedSiteId"": """ & gal_ContrtatRessource.Selected.id_site_sophia_go & """,
+                                                ""invoicedEntityId"": """ & gal_ContratBDC.Selected.gdc_invoicedEntityId & """,
+                                                ""itemStatus"": ""INPROGRESS"",
+                                                ""catalogRef"": """ & gal_ContrtatRessource.Selected.gdc_catalogRef & """," & varMontantFAS & varMontantAMOUNT & """categoryId"": """ & gal_ContrtatRessource.Selected.gdc_categoryId & """" & var_link_ressource & "
+                                            }
+                                        ]
+                                    }"
+                                );
+                                Set(
+                                    GraphQLBody,
+                                    "{""query"": """ & GraphQLQuery & """ ,
+                                  ""variables"": " & GraphQLVariables & "
+                                }"
+                                );
+                                Set(
+                                    GraphQLResult,
+                                    GraphQL.Run(GraphQLBody).reponse
+                                );
+                                /*
+                                Réponse
+                                {
+                                    "data": {
+                                        "contract": {
+                                            "addArticles": [
+                                                {
+                                                    "id": "16eb0111-4bc8-462a-bea9-d5a1a41d4de4",
+                                                    "__typename": "ContractArticle"
+                                                }
+                                            ],
+                                            "__typename": "ContractMutation"
+                                        }
+                                    }
+                                }
+                                */
+                                Set(
+                                    varJson,
+                                    ParseJSON(GraphQLResult)
+                                );
+                                Set(
+                                    var_id_product,
+                                    First(Table(varJson.data.contract.addArticles)).Value.id
+                                );
+                                Patch(
+                                    'oc_db.ressource_dpl',
+                                    ThisItem,
+                                    {
+                                        gdc_id_product: Text(var_id_product),
+                                        gdc_itemStatus: "INPROGRESS"
+                                    }
+                                );
+                              PaddingTop: =5
+                              Text: ="Go"
+                              VerticalAlign: =VerticalAlign.Middle
+                              Visible: =IsBlank(ThisItem.gdc_id_product)
+                              X: =736
+                              Y: =52
+                  - Rectangle11_3:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Fill: =ocColorFacturation
+                        Height: =1
+                        Width: =Parent.Width
+                        Y: =39
+      - ctn_CMES_NavBack_8:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Fill: =ocColorFacturation
+            Height: =48
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =58
+            X: =1274
+            Y: =13
+          Children:
+            - ico_CMES_NavBack_11:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =ocColorFacturation
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Parent.Height
+                  Icon: =Icon.ArrowRight
+                  OnSelect: =Navigate('A facturer')
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Width: =Parent.Width
+      - lbl_ADV_FiltreCommercial_7:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =34
+            PaddingRight: =10
+            Size: =12
+            Text: ="Client :"
+            Width: =200
+            X: =62
+            Y: =367
+      - ButtonCanvas12_3:
+          Control: Button@0.0.45
+          Properties:
+            Align: =Align.Left
+            Appearance: ='ButtonCanvas.Appearance'.Transparent
+            BasePaletteColor: =ocColorFacturation
+            FontSize: =14
+            FontUnderline: =true
+            Height: =23
+            OnSelect: |-
+              =Set(varUrlClient,LookUp(
+                                  'oc_db.client',
+                                  id_client_dynamics = gal_ContratBDC.Selected.dynamics_account_id
+                              ).id_sophia_live);
+
+
+              Launch("https://sophia3.sewan.fr/p"& varUrlClient &"/sites");
+            Text: =gal_ContratBDC.Selected.per_name
+            Visible: =!IsBlank(gal_ContratBDC.Selected)
+            Width: =850
+            X: =273
+            Y: =372
+      - chk_Enregistre:
+          Control: CheckBox@0.0.30
+          Properties:
+            BasePaletteColor: =ocColorFacturation
+            Checked: =If(gal_ContratBDC.Selected.ajout_gdc = Blank() Or Not gal_ContratBDC.Selected.ajout_gdc,false,true)
+            Height: =29
+            Label: ="Enregistré"
+            OnCheck: "=Patch(\r\n    'oc_db.bon_de_commande',\r\n \r\n    {\r\n        id_bon_de_commande: gal_ContratBDC.Selected.id_bon_de_commande,\r\n        ajout_gdc:true})"
+            OnUncheck: "=Patch(\r\n    'oc_db.bon_de_commande',\r\n    \r\n    {\r\n        id_bon_de_commande: gal_ContratBDC.Selected.id_bon_de_commande,\r\n        ajout_gdc:false})"
+            Width: =122
+            X: =988
+            Y: =403
+      - ContContratRessource:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Height: =658
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: =visConContratRessource
+            Width: =219
+            X: =1134
+            Y: =78
+          Children:
+            - Label31_2:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =ocColorFacturation
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =42
+                  Text: |-
+                    ="Site
+                    "
+                  Width: =219
+            - TxVérif1_7:
+                Control: Text@0.0.51
+                Group: Group9
+                Properties:
+                  FontColor: =If(IsBlank(gal_ContrtatRessource.Selected.gdc_id_product) , Color.Green,Color.Red)
+                  Height: =20
+                  Text: ="Id Produit"
+                  Width: =177
+                  X: =35
+                  Y: =405
+            - TxVérif1_1:
+                Control: Text@0.0.51
+                Group: Group9
+                Properties:
+                  FontColor: =If(!IsBlank(gal_ContratBDC.Selected.gdc_contractId) , Color.Green,Color.Red)
+                  Height: =20
+                  Text: ="N° contrat"
+                  Width: =177
+                  X: =35
+                  Y: =271
+            - TxVérif1_2:
+                Control: Text@0.0.51
+                Group: Group9
+                Properties:
+                  FontColor: =If(!IsBlank(gal_ContrtatRessource.Selected.gdc_serviceId)  , Color.Green,Color.Red)
+                  Height: =20
+                  Text: ="Service"
+                  Width: =177
+                  X: =35
+                  Y: =293
+            - txtSeachContratSite:
+                Control: TextInput@0.0.54
+                Properties:
+                  Height: =30
+                  Value: =gal_ContrtatRessource.Selected.nom_site
+                  Width: =141
+                  X: =18
+                  Y: =58
+            - TxVérif1_3:
+                Control: Text@0.0.51
+                Group: Group9
+                Properties:
+                  FontColor: =If(!IsBlank(gal_ContrtatRessource.Selected.id_site_sophia_go)  , Color.Green,Color.Red)
+                  Height: =20
+                  Text: ="Site Sophia"
+                  Width: =177
+                  X: =35
+                  Y: =315
+            - Icon26_2:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =26
+                  Icon: =Icon.Search
+                  OnSelect: |
+                    =Set(
+                        GraphQLQuery,
+                        "query TableSites($organizationId: ID!, $filters: SiteFilters, $pagination: Pagination) {\n  site {\n    getSites(\n      organizationId: $organizationId\n      pagination: $pagination\n      filters: $filters\n    ) {\n      edges {\n        id\n        name\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                    );
+                    Set(
+                        GraphQLVariables,
+                        "{""organizationId"":""" & gal_ContratBDC.Selected.id_sophia_go_facturation & """,""filters"":{""textSearch"":""" & txtSeachContratSite.Value & """},""pagination"":{""page"":1,""limit"":200}}"
+                    );
+                    Set(
+                        GraphQLBody,
+                        "{""query"": """ & GraphQLQuery & """ ,
+                      ""variables"": " & GraphQLVariables & "
+                    }"
+                    );
+                    Set(
+                        GraphQLResult,
+                        GraphQL.Run(GraphQLBody).reponse
+                    );
+                    Set(
+                        varJson,
+                        ParseJSON(GraphQLResult)
+                    );
+                    /*
+                    ClearCollect(
+                        MyCollection;
+                        ShowColumns(
+                            Filter(
+                                ForAll(
+                                    Table(varJson.data.search.search.edges);
+                                    With(
+                                        {
+                                            record: Value;
+                                            breadcrumbNamesList: ForAll(
+                                                Table(record.breadcrumbNames);
+                                                Text(Value)
+                                            )
+                                        };
+                                        {
+                                            id: Text(record.id);
+                                            name: Text(record.name);
+                                            category: Text(record.category);
+                                            breadcrumbNames: breadcrumbNamesList
+                                        }
+                                    )
+                                );
+                                category = "organization" && CountIf(breadcrumbNames; Value = "Sewan Entreprise") > 0
+                            );
+                            "id";
+                            "name"
+                        )
+                    )
+                    */
+                    /*
+                        ClearCollect(
+                            cl_Organization;
+                            ForAll(
+                                Table(varJson.data.search.search.edges);
+                                {
+                                    id: Value.id;
+                                    name: Value.name;
+                                    type: Value.type;
+                                    category: Value.category;
+                                    breadcrumbNames: Concat(Value.breadcrumbNames;Value;" > ")
+                                }
+                            )
+                        );;
+                        */
+                    ClearCollect(
+                        cl_SiteContart,
+                        ForAll(
+                            Table(varJson.data.site.getSites.edges),
+                            With(
+                                {
+                                    id: ThisRecord.Value.id,
+                                    name: ThisRecord.Value.name
+                                },
+                                {
+                                    id: id,
+                                    name: name
+                                }
+                            )
+                        );
+                            // Condition pour filtrer les enregistrements contenant "Sewan Entreprise"
+                    )
+                    // Accéder au tableau edges
+                    //Set(
+                    //    edgesArray;
+                    //    varJson.Value.data.Value.search.Value.search.Value.edges.Value
+                    //);;
+                  Width: =35
+                  X: =177
+                  Y: =69
+            - TxVérif1_4:
+                Control: Text@0.0.51
+                Group: Group9
+                Properties:
+                  FontColor: =If(!IsBlank(gal_ContratBDC.Selected.gdc_invoicedEntityId) , Color.Green,Color.Red)
+                  Height: =20
+                  Text: ="Entité de facturation"
+                  Width: =177
+                  X: =35
+                  Y: =337
+            - drp_contratsitego:
+                Control: Classic/DropDown@2.3.1
+                Properties:
+                  AllowEmptySelection: =true
+                  BorderColor: =ocColorFacturation
+                  ChevronBackground: =ocColorFacturation
+                  ChevronFill: =RGBA(255, 255, 255, 1)
+                  ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                  ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                  Default: =false
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  Height: =25
+                  HoverFill: =Self.SelectionFill
+                  Items: =cl_SiteContart
+                  Items.Value: =name
+                  OnChange: =
+                  PressedColor: =RGBA(0, 0, 0, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  SelectionColor: =RGBA(0, 0, 0, 1)
+                  SelectionFill: =RGBA(104, 151, 111, 0.19)
+                  Size: =12
+                  Width: =161
+                  X: =18
+                  Y: =103
+            - TxVérif1_5:
+                Control: Text@0.0.51
+                Group: Group9
+                Properties:
+                  FontColor: =If(!IsBlank(gal_ContrtatRessource.Selected.gdc_catalogRef), Color.Green,Color.Red)
+                  Height: =20
+                  Text: ="Ref Catalogue"
+                  Width: =177
+                  X: =35
+                  Y: =359
+            - TextCanvas16_1:
+                Control: Text@0.0.51
+                Properties:
+                  Height: =101
+                  Text: '=drp_contratsitego.Selected.name '
+                  VerticalAlign: =VerticalAlign.Top
+                  Width: =194
+                  X: =18
+                  Y: =143
+            - TxVérif1_6:
+                Control: Text@0.0.51
+                Group: Group9
+                Properties:
+                  FontColor: =If(!IsBlank(gal_ContrtatRessource.Selected.gdc_categoryId)  , Color.Green,Color.Red)
+                  Height: =20
+                  Text: ="Catégorie"
+                  Width: =177
+                  X: =35
+                  Y: =381
+            - ico_enreg_client_4:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =31
+                  Icon: =Icon.Save
+                  OnSelect: |-
+                    =Patch(
+                        'oc_db.site',
+                        LookUp(
+                            'oc_db.site',
+                            id_site = gal_ContrtatRessource.Selected.site
+                        ),
+                        {
+                            id_sophia_go: Text(drp_contratsitego.Selected.id),
+                            site_nom_sophia: Text(drp_contratsitego.Selected.name)
+                        }
+                    );
+                    ClearCollect(
+                        var_r,
+                        Filter(
+                            'oc_db.ressource_dpl',
+                            site = gal_ContrtatRessource.Selected.site
+                        )
+                    );
+                    ForAll(
+                        var_r,
+                        Patch(
+                            'oc_db.ressource_dpl',
+                            ThisRecord,
+                            {id_site_sophia_go: Text(drp_contratsitego.Selected.id)}
+                        )
+                    )
+                  Width: =36
+                  X: =176
+                  Y: =100
+      - lbl_ADV_FiltreCommercial_9:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingRight: =10
+            Size: =12
+            Text: ="Contrat :"
+            Width: =200
+            X: =62
+            Y: =392
+      - ButtonCanvas12_4:
+          Control: Button@0.0.45
+          Properties:
+            Align: =Align.Left
+            Appearance: ='ButtonCanvas.Appearance'.Transparent
+            BasePaletteColor: =ocColorFacturation
+            FontSize: =14
+            FontUnderline: =true
+            Height: =23
+            OnSelect: |-
+              =
+              Launch("https://sophia3.sewan.fr/go/admin/contracts/8f19e50e-1be4-48b7-8c2a-6d0c477ff141/contract/" & gal_ContratBDC.Selected.gdc_contractId & "?tab=articles");
+            Text: =gal_ContratBDC.Selected.gdc_contractName
+            Visible: =!IsBlank(gal_ContratBDC.Selected)
+            Width: =850
+            X: =273
+            Y: =395
+      - drp_Vue_Contrat_BDC:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            AllowEmptySelection: =true
+            BorderColor: =ocColorFacturation
+            ChevronBackground: =ocColorFacturation
+            ChevronFill: =RGBA(255, 255, 255, 1)
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =RGBA(255, 255, 255, 1)
+            Default: ="Sans Contrat"
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =25
+            HoverFill: =Self.SelectionFill
+            Items: =cl_Vue_Contrat_BDC
+            Items.Value: =Categorie
+            OnChange: =
+            PressedColor: =RGBA(0, 0, 0, 1)
+            PressedFill: =RGBA(255, 255, 255, 1)
+            SelectionColor: =RGBA(0, 0, 0, 1)
+            SelectionFill: =RGBA(104, 151, 111, 0.19)
+            Size: =10
+            Width: =250
+            X: =674
+            Y: =28
+      - TextCanvas5:
+          Control: Text@0.0.51
+          Properties:
+            Height: =25
+            Text: ="Vues"
+            Width: =47
+            X: =627
+            Y: =28

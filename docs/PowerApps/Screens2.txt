@@ -1,0 +1,2924 @@
+Screens:
+  A facturer:
+    Properties:
+      BackgroundImage: =sewan_background
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |+
+        =Reset(txt_CMES_Recherche_a_facturer);
+        Set(varFacturer,1);
+        //ClearCollect(cl_RessourcesNonAttribuees;Distinct(Filter('oc_db.ressource_dpl';charge_de_planif = "" || charge_de_planif = Blank());id_commande));;
+        //ClearCollect(cl_BDC_ticket_tipi;Filter('oc_db.bon_de_commande';ticket_tipi <> "" && ticket_tipi <> Blank()));;
+
+        //ClearCollect(BdcAttribution;AddColumns(cl_BDC_ticket_tipi As Record;Attribution; If(IsBlank(Filter(cl_RessourcesNonAttribuees;Value = Record.id_bon_de_commande)) ;"Oui";"Non")));;
+
+        Set(
+            varVisiblePlanif,
+            btn_gal_Planif_Filtre_Derniers_Com_4.Text
+        );
+        Set(
+            varFacturer,
+            5
+        );
+
+        /*
+        ClearCollect(
+            clFacture;
+            AddColumns(
+            Filter(
+                'oc_db.vue_ressource_dpl_facturation';
+                J2_date_CMES <> Blank() Or date_factu_anticipee <> Blank()
+            );tmp_visible_update;false)
+        );;
+        */
+
+        RefreshFacturation();
+
+
+
+        ClearCollect(clAnnules,'oc_db.vue_bdc_annules');
+
+        /*ClearCollect(BdcAttribution;AddColumns(Filter('oc_db.bon_de_commande';ticket_tipi <> "" && ticket_tipi <> Blank()) As Record;"Attribution"; If(IsBlank(Filter(Distinct(Filter('oc_db.ressource_dpl';charge_de_planif = "" || charge_de_planif = Blank());id_commande);Value = Record.id_bon_de_commande)) ;"Oui";"Non")))*/
+
+        //Refresh('oc_db.ressource_dpl');;
+
+        ClearCollect(
+            cl_Vue_Contrat_CMES,
+            [
+                {
+                    Categorie: "Tous",
+                    id: 1
+                },
+                {
+                    Categorie: "A Facturer",
+                    id: 2
+                },
+
+                {
+                    Categorie: "Masquées",
+                    id: 3
+                },
+
+                {
+                    Categorie: "Dans la GDC",
+                    id: 4
+                }
+            ]
+        )
+
+
+    Children:
+      - ctn_gal_Planif_Filtre_1:
+          Control: GroupContainer@1.4.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =55
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =10
+            LayoutOverflowX: =LayoutOverflow.Scroll
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =5
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =1029
+            X: =66
+            Y: =85
+          Children:
+            - btn_gal_Planif_Filtre_Derniers_Com_4:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  BorderColor: =ocColorFacturation
+                  Color: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_4.Text, Color.White,ocColorFacturation)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_4.Text, ocColorFacturation,Color.White)
+                  FillPortions: =1
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =Self.BorderColor
+                  HoverColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_4.Text, Color.White,ocColorFacturation)
+                  HoverFill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_4.Text, ocColorFacturation,ColorFade(ocColorFacturation,75%))
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  LayoutMinWidth: =130
+                  OnSelect: |-
+                    =Set(
+                        varVisiblePlanif,
+                        Self.Text
+                    );
+                    Set(
+                        varFacturer,
+                        5
+                    );/*
+                    ClearCollect(
+                        clFacture;
+                        Filter(
+                            'oc_db.vue_ressource_dpl';
+                            J2_date_CMES <> Blank()
+                        )
+                    );;
+                    Reset(gal_Facture)*/
+                  PaddingBottom: =15
+                  PressedBorderColor: =ocColorFacturation
+                  PressedColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_4.Text,Color.White, ocColorFacturation)
+                  PressedFill: =Self.Fill
+                  Size: =13
+                  Text: ="CMES"
+            - btn_gal_Planif_Filtre_Attribués_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  BorderColor: =ocColorFacturation
+                  Color: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Attribués_1.Text, Color.White,ocColorFacturation)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Attribués_1.Text, ocColorFacturation,Color.White)
+                  FillPortions: =1
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =Self.BorderColor
+                  HoverColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Attribués_1.Text, Color.White,ocColorFacturation)
+                  HoverFill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Attribués_1.Text, ocColorFacturation,ColorFade(ocColorFacturation,75%))
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  LayoutMinWidth: =130
+                  OnSelect: |-
+                    =Set(varVisiblePlanif,Self.Text);
+                    Set(varFacturer,1);
+                    Reset(gal_Facture)
+                  PaddingBottom: =15
+                  PressedBorderColor: =ocColorFacturation
+                  PressedColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Attribués_1.Text,Color.White, ocColorFacturation)
+                  PressedFill: =Self.Fill
+                  Size: =13
+                  Text: ="Fac. Anticipées"
+            - btn_gal_Planif_Filtre_Rappel_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  BorderColor: =ocColorFacturation
+                  Color: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Rappel_1.Text, Color.White,ocColorFacturation)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: =DisplayMode.Disabled
+                  Fill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Rappel_1.Text, ocColorFacturation,Color.White)
+                  FillPortions: =1
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =Self.BorderColor
+                  HoverColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Rappel_1.Text, Color.White,ocColorFacturation)
+                  HoverFill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Rappel_1.Text, ocColorFacturation,ColorFade(ocColorFacturation,75%))
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  LayoutMinWidth: =130
+                  OnSelect: |-
+                    =Set(varVisiblePlanif,Self.Text);
+                    Set(varFacturer,2);
+                    Reset(gal_Facture)
+                  PaddingBottom: =15
+                  PressedBorderColor: =ocColorFacturation
+                  PressedColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Rappel_1.Text,Color.White, ocColorFacturation)
+                  PressedFill: =Self.Fill
+                  Size: =13
+                  Text: ="Résilier"
+            - btn_gal_Planif_Filtre_Derniers_Com_2:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  BorderColor: =ocColorFacturation
+                  Color: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_2.Text, Color.White,ocColorFacturation)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: =DisplayMode.Disabled
+                  Fill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_2.Text, ocColorFacturation,Color.White)
+                  FillPortions: =1
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =Self.BorderColor
+                  HoverColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_2.Text, Color.White,ocColorFacturation)
+                  HoverFill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_2.Text, ocColorFacturation,ColorFade(ocColorFacturation,75%))
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  LayoutMinWidth: =130
+                  OnSelect: |-
+                    =Set(varVisiblePlanif,Self.Text);
+                    Set(varFacturer,3);
+                    Reset(gal_Facture)
+                  PaddingBottom: =15
+                  PressedBorderColor: =ocColorFacturation
+                  PressedColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_2.Text,Color.White, ocColorFacturation)
+                  PressedFill: =Self.Fill
+                  Size: =13
+                  Text: ="Reconduire"
+            - btn_gal_Planif_Filtre_Derniers_Com_3:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  BorderColor: =ocColorFacturation
+                  Color: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_3.Text, Color.White,ocColorFacturation)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: =DisplayMode.Disabled
+                  Fill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_3.Text, ocColorFacturation,Color.White)
+                  FillPortions: =1
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =Self.BorderColor
+                  HoverColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_3.Text, Color.White,ocColorFacturation)
+                  HoverFill: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_3.Text, ocColorFacturation,ColorFade(ocColorFacturation,75%))
+                  LayoutMaxHeight: =
+                  LayoutMaxWidth: =
+                  LayoutMinWidth: =130
+                  OnSelect: |-
+                    =Set(varVisiblePlanif,Self.Text);
+                    Set(varFacturer,4);
+                    Reset(gal_Facture)
+                  PaddingBottom: =15
+                  PressedBorderColor: =ocColorFacturation
+                  PressedColor: =If(varVisiblePlanif = btn_gal_Planif_Filtre_Derniers_Com_3.Text,Color.White, ocColorFacturation)
+                  PressedFill: =Self.Fill
+                  Size: =13
+                  Text: |-
+                    ="Annuler
+                    "
+      - Timer2_2:
+          Control: Timer@2.1.0
+          Properties:
+            AutoPause: =false
+            BorderColor: =ColorFade(Self.Fill, -15%)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Fill, 90%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            Fill: =RGBA(56, 96, 178, 1)
+            Font: =Font.'Open Sans'
+            HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            OnTimerEnd: |-
+              =Refresh('oc_db.ressource');
+              Refresh('oc_db.bon_de_commande')
+            PressedBorderColor: =Self.Fill
+            PressedColor: =Self.Fill
+            PressedFill: =Self.Color
+            Visible: =false
+      - ctn_CMES_NavBack_5:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Fill: =ocColorFacturation
+            Height: =48
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =58
+            X: =4
+            Y: =18
+          Children:
+            - ico_CMES_NavBack_5:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =ocColorFacturation
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Parent.Height
+                  Icon: =Icon.ArrowLeft
+                  OnSelect: =Navigate('Validation BDC')
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Width: =Parent.Width
+            - ico_CMES_NavBack_6:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =ocColorFacturation
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Parent.Height
+                  Icon: =Icon.ArrowLeft
+                  OnSelect: =Navigate('Validation BDC')
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Width: =Parent.Width
+      - ctn_CMES_Client_43:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Height: =35
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =482
+            X: =88
+            Y: =20
+          Children:
+            - txt_CMES_Recherche_a_facturer:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  BorderThickness: =0
+                  Default: =""
+                  FocusedBorderThickness: =0
+                  Font: =Font.'Open Sans'
+                  Height: =Parent.Height
+                  HintText: ="Chercher un numéro de ticket/BDC ou nom de client..."
+                  HoverBorderColor: =RGBA(0, 18, 107, 1)
+                  HoverFill: =RGBA(104, 151, 111, 0.05)
+                  PaddingLeft: =15
+                  Width: =Parent.Width
+      - ctn_CMES_gal_ressources_10:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Fill: =RGBA(104, 151, 111, 0.05)
+            Height: =565
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =1061
+            X: =52
+            Y: =133
+          Children:
+            - Container8_2:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ocColorFacturation
+                  Height: =40
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lbl_CMES_gal_Ressources_Header_Site_39:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =3
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =200
+                        PaddingLeft: =15
+                        Size: =12
+                        Text: ="Ressources ("&gal_Facture.AllItemsCount&")"
+                        Width: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_46:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Size: =12
+                        Text: ="Qté"
+                        Width: =154
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_40:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Size: =12
+                        Text: ="Code produit"
+                        Width: =80
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_41:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Size: =12
+                        Text: ="Abo"
+                        Width: =154
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_42:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Start
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Size: =12
+                        Text: ="FAS"
+                        Width: =225
+                        X: =611
+                  - lbl_CMES_gal_Ressources_Header_Site_43:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.15
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =100
+                        Size: =12
+                        Text: |-
+                          =If(varFacturer = 1,
+                          "Date de facture",
+
+                          "Date CMES" )
+                        Width: =80
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_44:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =1.6
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Size: =12
+                        Text: ="Site Sophia"
+                        Width: =80
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_45:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Size: =12
+                        Text: =
+                        Width: =30
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_52:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Size: =12
+                        Text: =
+                        Width: =30
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_53:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Size: =12
+                        Text: =
+                        Width: =30
+                        X: =456
+                  - lbl_CMES_gal_Ressources_Header_Site_54:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(1,1,1,0)
+                        FillPortions: =0.1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinWidth: =50
+                        Size: =12
+                        Text: ="Msq"
+                        Width: =80
+                        X: =456
+            - gal_Facture:
+                Control: Gallery@2.15.0
+                Variant: VariableHeight
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Default: ={}
+                  Height: =Parent.Height - Container8_2.Height
+                  Items: |-
+                    =Search(
+                        With(
+                            {searchText: txt_CMES_Recherche_a_facturer.Text},
+                            Switch(
+                                varFacturer,
+                                1,
+                                Switch(
+                                    drp_Vue_Contrat_CMES.Selected.id,
+                                    1,
+                                    SortByColumns(
+                                        Filter(
+                                            clFacture,
+                                            date_factu_anticipee <> Blank()
+                                        ),
+                                        "date_factu_anticipee",
+                                        SortOrder.Descending
+                                    ),
+                                    2,
+                                    SortByColumns(
+                                        Filter(
+                                            clFacture,
+                                            gdc_itemStatus <> "ACTIVATED",
+                                            date_factu_anticipee <> Blank(),
+                                            gdc_hidden <> 1
+                                        ),
+                                        "date_factu_anticipee",
+                                        SortOrder.Descending
+                                    ),
+                                    3,
+                                    SortByColumns(
+                                        Filter(
+                                            clFacture,
+                                            gdc_hidden = 1,
+                                            date_factu_anticipee <> Blank()
+                                        ),
+                                        "date_factu_anticipee",
+                                        SortOrder.Descending
+                                    )
+                                ),
+                                5,
+                                Switch(
+                                    drp_Vue_Contrat_CMES.Selected.id,
+                                    1,
+                                    SortByColumns(
+                                        Filter(
+                                            clFacture,
+                                            J2_date_CMES <> Blank()
+                                        ),
+                                        "J2_date_CMES",
+                                        SortOrder.Descending
+                                    ),
+                                    2,
+                                    SortByColumns(
+                                        Filter(
+                                            clFacture,
+                                            gdc_itemStatus <> "ACTIVATED",
+                                            J2_date_CMES <> Blank(),
+                                            gdc_hidden <> 1
+                                        ),
+                                        "J2_date_CMES",
+                                        SortOrder.Descending
+                                    ),
+                                    3,
+                                    SortByColumns(
+                                        Filter(
+                                            clFacture,
+                                            gdc_hidden = 1,
+                                            J2_date_CMES <> Blank()
+                                        ),
+                                        "J2_date_CMES",
+                                        SortOrder.Descending
+                                    ),
+                                    4,
+                                    SortByColumns(
+                                        Filter(
+                                            clFacture,
+                                            gdc_itemStatus <> Blank()
+                                        ),
+                                        "J2_date_CMES",
+                                        SortOrder.Descending
+                                    )
+                                )
+                            )
+                        ),
+                        txt_CMES_Recherche_a_facturer.Text,
+                        bdc_numero_bdc,
+                        bdc_per_name,
+                        site_name,
+                        site_site_nom_sophia
+                    )
+                  OnSelect: |
+                    =Set(
+                        visConContratBDC,
+                        false
+                    );
+                    Set(
+                        visConContratRessource,
+                        true
+                    );
+                    If(
+                        IsBlank(ThisItem.id_site_sophia_go),
+                        Patch(
+                            'oc_db.ressource_dpl',
+                            {
+                                id_dpl: ThisItem.id_dpl,
+                                id_site_sophia_go: LookUp(
+                                    'oc_db.site',
+                                    id_site = ThisItem.site
+                                ).id_sophia_go
+                            }
+                        )
+                    );
+                  TemplatePadding: =0
+                  TemplateSize: =40
+                  Width: =1061
+                  Y: =40
+                Children:
+                  - Container10_2:
+                      Control: GroupContainer@1.4.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: |-
+                          =If(!IsBlank(
+                              LookUp(
+                                  clAnnules,
+                                  id_bon_annule = ThisItem.bdc_id_bon_de_commande
+                              )
+                          )
+                              ,
+                              RGBA( 
+                                  0,
+                                  0,
+                                  0,
+                                  0.1
+                              ),
+                              RGBA(
+                                  0,
+                                  0,
+                                  0,
+                                  0
+                              )
+                          )
+                        Height: =40
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width
+                      Children:
+                        - TextCanvas19:
+                            Control: Text@0.0.51
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              Text: =If(ThisItem.remplacement = 1, " Rp",ThisItem.reconduction = 1, " Rc",ThisItem.upgrade = 1," Up","")
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: =40
+                        - lbl_CMES_gal_Ressources_SiteNom_20:
+                            Control: Label@2.5.1
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              AutoHeight: =true
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =3
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =250
+                              OnSelect: |-
+                                =Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingTop
+                              Size: =9
+                              Text: =ThisItem.offre_operateur & If(ThisItem.J2_date_CMES <> Blank(),"(Livré)","")  & Char(13) & Coalesce(ThisItem.gdc_productName_update, ThisItem.gdc_productName)
+                              VerticalAlign: =VerticalAlign.Top
+                              Visible: =Not(ThisItem.tmp_visible_update)
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_39.Width
+                              X: =lbl_CMES_gal_Ressources_Header_Site_39.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_39.Y
+                        - Txt_Product_Name_Update:
+                            Control: TextInput@0.0.54
+                            Properties:
+                              FillPortions: =3
+                              FontColor: =RGBA(53, 61, 63, 1)
+                              Height: =39
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnChange: =Select(ButtonCanvas1)
+                              TriggerOutput: ='TextInputCanvas.TriggerOutput'.FocusOut
+                              Value: =ThisItem.gdc_productName_update
+                              Visible: =ThisItem.tmp_visible_update
+                              Width: =250
+                        - ButtonCanvas1:
+                            Control: Button@0.0.45
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: ='ButtonCanvas.Appearance'.Outline
+                              BorderStyle: =BorderStyle.None
+                              Height: =20
+                              Icon: ="Edit"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Outline
+                              Layout: ='ButtonCanvas.Layout'.IconOnly
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              OnSelect: |+
+                                =If(ThisItem.tmp_visible_update,
+                                Patch(
+                                    'oc_db.ressource_dpl',
+                                    {
+                                        id_dpl: ThisItem.id_dpl,
+                                        gdc_productName_update: Txt_Product_Name_Update.Value
+                                    }
+                                );
+                                Patch(
+                                    clFacture, LookUp(clFacture,id_dpl = ThisItem.id_dpl),
+                                    {
+                                        gdc_productName_update: Txt_Product_Name_Update.Value
+                                    }
+                                ));
+
+
+                                Patch(
+                                    clFacture, LookUp(clFacture,id_dpl = ThisItem.id_dpl),
+                                    {
+                                        tmp_visible_update: Not(ThisItem.tmp_visible_update)
+                                    }
+                                )
+
+                              Text: =
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: =26
+                        - lbl_CMES_gal_Ressources_SiteNom_26:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =30
+                              OnSelect: |-
+                                =Select(gal_Facture);
+                                Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_41.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_40.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingTop
+                              Size: =9
+                              Text: =ThisItem.quantite
+                              Tooltip: =Substitute(ThisItem.code_produit,"F/M","M")
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_40.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_39.Y
+                        - TextInputCanvas8_1:
+                            Control: TextInput@0.0.54
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              FillPortions: =1
+                              FontSize: =9
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnChange: "=Patch(\n    'oc_db.ressource_dpl',\n    {\n        id_dpl: ThisItem.id_dpl,\n        code_produit: TextInputCanvas8_1.Value,\n        gdc_catalogRef: Blank(),\n        gdc_productName: Blank()\n    }\n);\nPatch(\n    clFacture, LookUp(clFacture,id_dpl = ThisItem.id_dpl),\n    {\n        \n        code_produit: TextInputCanvas8_1.Value,\n        gdc_catalogRef: Blank(),\n        gdc_productName: Blank()\n    }\n);\n\n// Recherche du produit\nIf(\n    IsBlank(ThisItem.gdc_catalogRef) Or IsBlank(ThisItem.gdc_categoryId) Or IsBlank(ThisItem.gdc_productName) Or IsBlank(ThisItem.gdc_serviceId) Or IsBlank(ThisItem.gdc_contractId),\n    Set(\n        GraphQLQuery,\n        \"query ProductsByString($organizationId: UUID!, $search: String!) {\\n  contract {\\n    searchProducts(organizationId: $organizationId, search: $search) {\\n      serviceId\\n      serviceName\\n      productName\\n      categoryId\\n      subCategoryName\\n      eventType\\n      catalogRef\\n      unit\\n      price\\n      SAF\\n      connectedReferences {\\n        productName\\n        subCategoryName\\n        eventType\\n        catalogRef\\n        unit\\n        price\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\n    );\n    Set(\n        GraphQLVariables,\n        \"{\"\"organizationId\"\":\"\"8f19e50e-1be4-48b7-8c2a-6d0c477ff141\"\",\"\"search\"\":\"\"\" & Substitute(\n            TextInputCanvas8_1.Value,\n            \"F/M\",\n            \"M\"\n        ) & \"\"\"}\"\n    );\n    Set(\n        GraphQLBody,\n        \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\n        \"\"variables\"\": \" & GraphQLVariables & \"}\"\n    );\n    Set(\n        GraphQLResult,\n        GraphQL.Run(GraphQLBody).reponse\n    );\n    Set(\n        varJsonProduct,\n        ParseJSON(GraphQLResult)\n    );\n    Set(\n        varProduct,\n        First(Table(varJsonProduct.data.contract.searchProducts))\n    );\n    Patch(\n        'oc_db.ressource_dpl',\n        {\n            id_dpl: ThisItem.id_dpl,\n            gdc_serviceId: Text(varProduct.Value.serviceId),\n            gdc_categoryId: Text(varProduct.Value.categoryId),\n            gdc_catalogRef: Text(varProduct.Value.catalogRef),\n            gdc_productName: Text(varProduct.Value.productName),\n            gdc_contractId: Text(ThisItem.bdc_gdc_contractId)\n        }\n    );\n    UpdateIf(\n        clFacture,\n        id_dpl = ThisItem.id_dpl,\n        {\n            gdc_serviceId: Text(varProduct.Value.serviceId),\n            gdc_categoryId: Text(varProduct.Value.categoryId),\n            gdc_catalogRef: Text(varProduct.Value.catalogRef),\n            gdc_productName: Text(varProduct.Value.productName)\n        }\n    )\n);"
+                              Value: =If(IsBlank(ThisItem.gdc_catalogRef), ThisItem.code_produit,ThisItem.gdc_catalogRef)
+                        - lbl_CMES_gal_Ressources_SiteNom_21:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnSelect: |-
+                                =Select(gal_Facture);
+                                Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_41.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_40.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingTop
+                              Size: =9
+                              Text: =ThisItem.abo
+                              Tooltip: =Substitute(ThisItem.code_produit,"F/M","M")
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_40.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_39.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_22:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =50
+                              OnSelect: |-
+                                =Select(gal_Facture);
+                                Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_41.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_40.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingTop
+                              Size: =9
+                              Text: =ThisItem.fas
+                              Tooltip: =Substitute(ThisItem.code_produit,"F/M","F")
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_40.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_39.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_25:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =0.1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =30
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =100
+                              OnSelect: |-
+                                =Select(gal_Facture);
+                                Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_41.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_40.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingTop
+                              Size: =9
+                              Text: |-
+                                =If(ThisItem.J2_date_CMES <> Blank(),
+
+                                Text(DateValue(ThisItem.J2_date_CMES),"dd/mm/yyyy"),
+                                Text(DateValue(ThisItem.date_factu_anticipee),"dd/mm/yyyy"))
+                              Tooltip: =Substitute(ThisItem.code_produit,"F/M","F")
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_40.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_39.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_23:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =2
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =35
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: |-
+                                =Select(gal_Facture);
+                                Set(
+                                    varVisibleChoixContrat,
+                                    IsBlank(gal_Facture.Selected.bdc_gdc_contractId)
+                                );
+                                Set(
+                                    varEnrg,
+                                    gal_Facture.Selected
+                                );
+                                Set(
+                                    visConContratBDC,
+                                    false
+                                );
+                                Set(
+                                    visConContratRessource,
+                                    true
+                                );
+                                // Recherche du produit
+                                If(
+                                    IsBlank(ThisItem.gdc_catalogRef) Or IsBlank(ThisItem.gdc_categoryId) Or IsBlank(ThisItem.gdc_productName) Or IsBlank(ThisItem.gdc_serviceId) Or IsBlank(ThisItem.gdc_contractId),
+                                    Set(
+                                        GraphQLQuery,
+                                        "query ProductsByString($organizationId: UUID!, $search: String!) {\n  contract {\n    searchProducts(organizationId: $organizationId, search: $search) {\n      serviceId\n      serviceName\n      productName\n      categoryId\n      subCategoryName\n      eventType\n      catalogRef\n      unit\n      price\n      SAF\n      connectedReferences {\n        productName\n        subCategoryName\n        eventType\n        catalogRef\n        unit\n        price\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                                    );
+                                    Set(
+                                        GraphQLVariables,
+                                        "{""organizationId"":""8f19e50e-1be4-48b7-8c2a-6d0c477ff141"",""search"":""" & Substitute(
+                                            ThisItem.code_produit,
+                                            "F/M",
+                                            "M"
+                                        ) & """}"
+                                    );
+                                    Set(
+                                        GraphQLBody,
+                                        "{""query"": """ & GraphQLQuery & """ ,
+                                        ""variables"": " & GraphQLVariables & "}"
+                                    );
+                                    Set(
+                                        GraphQLResult,
+                                        GraphQL.Run(GraphQLBody).reponse
+                                    );
+                                    Set(
+                                        varJsonProduct,
+                                        ParseJSON(GraphQLResult)
+                                    );
+                                    Set(
+                                        varProduct,
+                                        First(Table(varJsonProduct.data.contract.searchProducts))
+                                    );
+                                    Patch(
+                                        'oc_db.ressource_dpl',
+                                        {
+                                            id_dpl: ThisItem.id_dpl,
+                                            gdc_serviceId: Text(varProduct.Value.serviceId),
+                                            gdc_categoryId: Text(varProduct.Value.categoryId),
+                                            gdc_catalogRef: Text(varProduct.Value.catalogRef),
+                                            gdc_productName: Text(varProduct.Value.productName),
+                                            gdc_contractId: Text(ThisItem.bdc_gdc_contractId)
+                                        }
+                                    );
+                                    UpdateIf(
+                                        clFacture,
+                                        id_dpl = ThisItem.id_dpl,
+                                        {
+                                            gdc_serviceId: Text(varProduct.Value.serviceId),
+                                            gdc_categoryId: Text(varProduct.Value.categoryId),
+                                            gdc_catalogRef: Text(varProduct.Value.catalogRef),
+                                            gdc_productName: Text(varProduct.Value.productName)
+                                        }
+                                    )
+                                );
+                                /*
+                                Set(
+                                    GraphQLQuery;
+                                    "    query useOrganizationQuery($perId: String!){
+                                    organization {
+                                      getOrganizationFromLive(perId: $perId) {
+                                          id
+                                          name
+                                          livePerId
+                                        }
+                                      }
+                                    }"
+                                );;
+                                */// Recherche du site
+                                If(
+                                    !IsBlank(varEnrg.id_site_sophia_go) And !IsBlank(varEnrg.gdc_contractId),
+                                    Set(
+                                        GraphQLQuery_Combined,
+                                        "query CheckSiteInContract($contractId: UUID!, $siteId: ID!) {
+                                          contract {
+                                              get(id: $contractId) {
+                                                  client {
+                                                      id
+                                                      name
+                                                  }
+                                              }
+                                          }
+                                          organization {
+                                              getHierarchy(entityId: $siteId) {
+                                                  id
+                                                  name
+                                                  type
+                                              }
+                                          }
+                                      }"
+                                    );
+                                    Set(
+                                        GraphQLVariables_Combined,
+                                        "{
+                                          ""contractId"": """ & varEnrg.gdc_contractId & """,
+                                          ""siteId"": """ & varEnrg.id_site_sophia_go & """
+                                      }"
+                                    );
+                                    Set(
+                                        GraphQLBody_Combined,
+                                        "{""query"": """ & GraphQLQuery_Combined & """, ""variables"": " & GraphQLVariables_Combined & "}"
+                                    );
+                                    Set(
+                                        varCombinedResult,
+                                        ParseJSON(GraphQL.Run(GraphQLBody_Combined).reponse)
+                                    );
+                                    Set(
+                                        GraphQLResultTo,
+                                        GraphQL.Run(GraphQLBody_Combined).reponse
+                                    );
+                                    Set(
+                                        varJsonidGoTo,
+                                        ParseJSON(GraphQLResult)
+                                    );
+                                    // Vérification directe
+                                    Set(
+                                        varClientId,
+                                        Text(varCombinedResult.data.contract.get.client.id)
+                                    );
+                                    Set(
+                                        varSiteInClientHierarchy,
+                                        !IsBlank(
+                                            LookUp(
+                                                ForAll(
+                                                    Table(varCombinedResult.data.organization.getHierarchy),
+                                                    Text(Value.id)
+                                                ),
+                                                Value = varClientId
+                                            )
+                                        )
+                                    );
+                                    If(
+                                        !varSiteInClientHierarchy,
+                                        Patch(
+                                            'oc_db.ressource_dpl',
+                                            {
+                                                id_dpl: ThisItem.id_dpl,
+                                                id_site_sophia_go: Blank(),
+                                                site: Blank()
+                                            }
+                                        );
+                                        UpdateIf(
+                                            clFacture,
+                                            id_dpl = ThisItem.id_dpl,
+                                            {
+                                                id_site_sophia_go: Blank(),
+                                                site: Blank()
+                                            }
+                                        )
+                                    )
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =9
+                              Text: =ThisItem.nom_site & Char(13) & ThisItem.site_site_nom_sophia
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_40.Width
+                              Wrap: =false
+                              X: =456
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_39.Y
+                        - bt_fac_inprogress:
+                            Control: Button@0.0.45
+                            Properties:
+                              Appearance: ='ButtonCanvas.Appearance'.Secondary
+                              BasePaletteColor: =ocColorFacturation
+                              BorderStyle: =BorderStyle.None
+                              DisplayMode: |-
+                                =If(
+                                    IsBlank(ThisItem.gdc_itemStatus) And !IsBlank(ThisItem.site_site_nom_sophia) And !IsBlank(ThisItem.bdc_gdc_contractId) And !IsBlank(ThisItem.gdc_serviceId) And !IsBlank(ThisItem.id_site_sophia_go) And !IsBlank(ThisItem.bdc_gdc_invoicedEntityId) And !IsBlank(ThisItem.gdc_catalogRef) And !IsBlank(ThisItem.gdc_categoryId) And IsBlank(ThisItem.gdc_id_product),
+                                    DisplayMode.Edit,
+                                    DisplayMode.Disabled
+                                )
+                              Icon: ="Add"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Outline
+                              Layout: ='ButtonCanvas.Layout'.IconOnly
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: "=If(\r\n    !IsBlank(ThisItem.J0_id_sophia),\r\n    Set(\r\n        var_tmp_site,\r\n        LookUp(\r\n            'oc_db.site',\r\n            id_site = ThisItem.site\r\n        )\r\n    );\r\n    Set(\r\n        var_link_ressource,\r\n        \",\r\n                \"\"resourceLink\"\":\"\"\" & \"https://sophia3.sewan.fr/p\" & var_tmp_site.per_id & \"/access_links?form_id=\" & ThisItem.J0_id_sophia & \"\"\",\r\n                \"\"resourceLinkName\"\": \"\"\" & ThisItem.J0_id_sophia & \"\"\"\"\r\n    ),\r\n    Set(\r\n        var_link_ressource,\r\n        \"\"\r\n    )\r\n);\r\nSet(\r\n    varMontantFAS,\r\n     \"\"\"SAF\"\": 0,\"\r\n);\r\nSet(\r\n    varMontantAMOUNT,\r\n    \"\"\"amount\"\": 0,\"\r\n);\r\nIf(\r\n    gal_Facture.Selected.fas <> 0,\r\n    Set(varMontantFAS , \"\"\"SAF\"\": \" & Substitute(\r\n        gal_Facture.Selected.fas,\r\n        \",\",\r\n        \".\"\r\n    ) & \",\")\r\n);\r\nIf(\r\n    gal_Facture.Selected.abo <> 0,\r\n    Set(varMontantAMOUNT ,  \"\"\"amount\"\": \" & Substitute(\r\n        gal_Facture.Selected.abo,\r\n        \",\",\r\n        \".\"\r\n    ) & \",\")\r\n);\r\nSet(\r\n    GraphQLQuery,\r\n    \"mutation createArticles($contractId: UUID!, $articles: [ContractArticlesInput!]!) {\\n  contract {\\n    addArticles(contractId: $contractId, articles: $articles) {\\n      id\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);\r\nSet(\r\n    GraphQLVariables,\r\n    \" {\r\n        \"\"contractId\"\": \"\"\" & gal_Facture.Selected.bdc_gdc_contractId & \"\"\",\r\n        \"\"articles\"\": [\r\n            {\r\n                \"\"serviceId\"\": \"\"\" & gal_Facture.Selected.gdc_serviceId & \"\"\",\r\n                \"\"concernedSiteId\"\": \"\"\" & gal_Facture.Selected.id_site_sophia_go & \"\"\",\r\n                \"\"invoicedEntityId\"\": \"\"\" & gal_Facture.Selected.bdc_gdc_invoicedEntityId & \"\"\",\r\n                \"\"qty\"\": \" & gal_Facture.Selected.quantite & \",\r\n                \"\"billingOrderRef\"\": \"\"\" & gal_Facture.Selected.bdc_numero_bdc & \"\"\",\r\n                \"\"customName\"\": \"\"\" & gal_Facture.Selected.gdc_productName_update & \"\"\",\r\n                \"\"itemStatus\"\": \"\"INPROGRESS\"\",\r\n                \"\"catalogRef\"\": \"\"\" & gal_Facture.Selected.gdc_catalogRef & \"\"\",\" & varMontantFAS & varMontantAMOUNT & \"\"\"categoryId\"\": \"\"\" & gal_Facture.Selected.gdc_categoryId & \"\"\"\" & var_link_ressource & \"\r\n            }\r\n        ]\r\n    }\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\n/*\r\nRéponse\r\n{\r\n    \"data\": {\r\n        \"contract\": {\r\n            \"addArticles\": [\r\n                {\r\n                    \"id\": \"16eb0111-4bc8-462a-bea9-d5a1a41d4de4\",\r\n                    \"__typename\": \"ContractArticle\"\r\n                }\r\n            ],\r\n            \"__typename\": \"ContractMutation\"\r\n        }\r\n    }\r\n}\r\n*/\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\nSet(\r\n    var_id_product,\r\n    First(Table(varJson.data.contract.addArticles)).Value.id\r\n);\r\nPatch(\r\n    'oc_db.ressource_dpl',\r\n\r\n    {\r\n        id_dpl: ThisItem.id_dpl,\r\n        gdc_id_product: Text(var_id_product),\r\n        gdc_itemStatus: \"INPROGRESS\"\r\n    }\r\n);\r\nPatch(\r\n    clFacture, LookUp(clFacture,id_dpl= ThisItem.id_dpl),\r\n\r\n    {\r\n        \r\n        gdc_id_product: Text(var_id_product),\r\n        gdc_itemStatus: \"INPROGRESS\"\r\n    }\r\n);\r\n"
+                              Width: =30
+                        - bt_fac_validation:
+                            Control: Button@0.0.45
+                            Properties:
+                              Appearance: ='ButtonCanvas.Appearance'.Secondary
+                              BasePaletteColor: =ocColorFacturation
+                              BorderStyle: =BorderStyle.None
+                              DisplayMode: |-
+                                =If(
+                                    ((IsBlank(ThisItem.gdc_itemStatus)  And IsBlank(ThisItem.gdc_id_product)) Or (ThisItem.gdc_itemStatus = "INPROGRESS" And !IsBlank(ThisItem.gdc_id_product))) And !IsBlank(ThisItem.site_site_nom_sophia) And !IsBlank(ThisItem.bdc_gdc_contractId) And !IsBlank(ThisItem.gdc_serviceId) And !IsBlank(ThisItem.id_site_sophia_go) And !IsBlank(ThisItem.bdc_gdc_invoicedEntityId) And !IsBlank(ThisItem.gdc_catalogRef) And !IsBlank(ThisItem.gdc_categoryId),
+                                    DisplayMode.Edit,
+                                    DisplayMode.Disabled
+                                )
+                              Icon: ="ArrowExit"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Outline
+                              Layout: ='ButtonCanvas.Layout'.IconOnly
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: |-
+                                =// ======================================================================
+                                // Variables communes
+                                // ======================================================================
+                                // Statut forcé à ACTIVATED
+                                Set(
+                                    varitemStatus,
+                                    "ACTIVATED"
+                                );
+                                // Date de mise en service (format GDC / GraphQL)
+                                If(
+                                    IsBlank(ThisItem.J2_date_CMES),
+                                    Set(
+                                        varInServiceDate,
+                                        Text(
+                                            ThisItem.date_factu_anticipee,
+                                            DateTimeZone.UTC
+                                        )
+                                    ),
+                                    Set(
+                                        varInServiceDate,
+                                        Text(
+                                            ThisItem.J2_date_CMES,
+                                            DateTimeZone.UTC
+                                        )
+                                    )
+                                );
+                                // Site Sophia (si présent)
+                                Set(
+                                    var_tmp_site,
+                                    If(
+                                        !IsBlank(ThisItem.J0_id_sophia),
+                                        LookUp(
+                                            'oc_db.site',
+                                            id_site = ThisItem.site
+                                        ),
+                                        Blank()
+                                    )
+                                );
+                                // Lien ressource Sophia (optionnel)
+                                Set(
+                                    var_link_ressource,
+                                    If(
+                                        !IsBlank(ThisItem.J0_id_sophia) && !IsBlank(var_tmp_site),
+                                        "https://sophia3.sewan.fr/p" & var_tmp_site.per_id & "/access_links?form_id=" & ThisItem.J0_id_sophia,
+                                        Blank()
+                                    )
+                                );
+                                // Bloc commun ARTICLE (réutilisé dans UPDATE + CREATE)
+                                Set(
+                                    varArticleCommon,
+                                    """itemStatus"": """ & varitemStatus & """,
+                                ""inServiceDate"": """ & varInServiceDate & """" & If(
+                                        !IsBlank(var_link_ressource),
+                                        ", ""resourceLinks"": [{""link"": """ & var_link_ressource & """}]",
+                                        ""
+                                    )
+                                );
+                                // ======================================================================
+                                // 1. UPDATE article existant (INPROGRESS -> ACTIVATED)
+                                // ======================================================================
+                                If(
+                                    ThisItem.gdc_itemStatus = "INPROGRESS" And !IsBlank(ThisItem.gdc_id_product),
+                                    // Variables GraphQL UPDATE
+                                    Set(
+                                        GraphQLVariables,
+                                        "{""id"": """ & ThisItem.gdc_id_product & """,
+                                  ""article"": { " & varArticleCommon & " }
+                                }"
+                                    );
+                                    Set(
+                                        GraphQLQuery,
+                                        "mutation UpdateArticle($id: UUID!, $article: ContractArticleUpdate!) {
+                                  contract {
+                                    updateArticle(id: $id, article: $article) {
+                                      inServiceDate
+                                      id
+                                    }
+                                  }
+                                }"
+                                    );
+                                    Set(
+                                        GraphQLBody,
+                                        "{""query"": """ & GraphQLQuery & """,
+                                  ""variables"": " & GraphQLVariables & "
+                                }"
+                                    );
+                                    Set(
+                                        GraphQLResult,
+                                        GraphQL.Run(GraphQLBody).reponse
+                                    );
+                                    Patch(
+                                        'oc_db.ressource_dpl',
+                                        {id_dpl: ThisItem.id_dpl},
+                                        {gdc_itemStatus: varitemStatus}
+                                    );
+                                    Patch(
+                                        clFacture,
+                                        LookUp(
+                                            clFacture,
+                                            id_dpl = ThisItem.id_dpl
+                                        ),
+                                        {gdc_itemStatus: varitemStatus}
+                                    )
+                                );
+                                // ======================================================================
+                                // 2. Facturation directe (CREATE article + synchro GDC)
+                                // ======================================================================
+                                If(
+                                    IsBlank(ThisItem.gdc_itemStatus) And IsBlank(ThisItem.gdc_id_product),
+                                    // Montants par défaut
+                                    Set(
+                                        varMontantFAS,
+                                        """SAF"": 0,"
+                                    );
+                                    Set(
+                                        varMontantAMOUNT,
+                                        """amount"": 0,"
+                                    );
+                                    // SAF
+                                    If(
+                                        gal_Facture.Selected.fas <> 0,
+                                        Set(
+                                            varMontantFAS,
+                                            """SAF"": " & Substitute(
+                                                gal_Facture.Selected.fas,
+                                                ",",
+                                                "."
+                                            ) & ","
+                                        )
+                                    );
+                                    // Abonnement
+                                    If(
+                                        gal_Facture.Selected.abo <> 0,
+                                        Set(
+                                            varMontantAMOUNT,
+                                            """amount"": " & Substitute(
+                                                gal_Facture.Selected.abo,
+                                                ",",
+                                                "."
+                                            ) & ","
+                                        )
+                                    );
+                                    // Mutation CREATE
+                                    Set(
+                                        GraphQLQuery,
+                                        "mutation createArticles($contractId: UUID!, $articles: [ContractArticlesInput!]!) {
+                                  contract {
+                                    addArticles(contractId: $contractId, articles: $articles) {
+                                      id
+                                      __typename
+                                    }
+                                    __typename
+                                  }
+                                }"
+                                    );
+                                    // Variables GraphQL CREATE
+                                    Set(
+                                        GraphQLVariables,
+                                        "{
+                                  ""contractId"": """ & gal_Facture.Selected.bdc_gdc_contractId & """,
+                                  ""articles"": [
+                                    {
+                                      " & varArticleCommon & ",
+                                      ""serviceId"": """ & gal_Facture.Selected.gdc_serviceId & """,
+                                      ""concernedSiteId"": """ & gal_Facture.Selected.id_site_sophia_go & """,
+                                      ""invoicedEntityId"": """ & gal_Facture.Selected.bdc_gdc_invoicedEntityId & """,
+                                      ""qty"": " & gal_Facture.Selected.quantite & ",
+                                      ""billingOrderRef"": """ & gal_Facture.Selected.bdc_numero_bdc & """,
+                                      ""customName"": """ & gal_Facture.Selected.gdc_productName_update & """,
+                                      ""catalogRef"": """ & gal_Facture.Selected.gdc_catalogRef & """,
+                                      " & varMontantFAS & varMontantAMOUNT & "
+                                      ""categoryId"": """ & gal_Facture.Selected.gdc_categoryId & """
+                                    }
+                                  ]
+                                }"
+                                    );
+                                    Set(
+                                        GraphQLBody,
+                                        "{""query"": """ & GraphQLQuery & """,
+                                  ""variables"": " & GraphQLVariables & "
+                                }"
+                                    );
+                                    Set(
+                                        GraphQLResult,
+                                        GraphQL.Run(GraphQLBody).reponse
+                                    );
+                                    Set(
+                                        varJson,
+                                        ParseJSON(GraphQLResult)
+                                    );
+                                    Set(
+                                        var_id_product,
+                                        First(Table(varJson.data.contract.addArticles)).Value.id
+                                    );
+                                    Patch(
+                                        'oc_db.ressource_dpl',
+                                        {id_dpl: ThisItem.id_dpl},
+                                        {
+                                            gdc_id_product: Text(var_id_product),
+                                            gdc_itemStatus: "ACTIVATED"
+                                        }
+                                    );
+                                    Patch(
+                                        clFacture,
+                                        LookUp(
+                                            clFacture,
+                                            id_dpl = ThisItem.id_dpl
+                                        ),
+                                        {
+                                            gdc_id_product: Text(var_id_product),
+                                            gdc_itemStatus: "ACTIVATED"
+                                        }
+                                    )
+                                )
+                              Width: =30
+                        - bt_del_article_1:
+                            Control: Button@0.0.45
+                            Properties:
+                              Appearance: ='ButtonCanvas.Appearance'.Secondary
+                              BasePaletteColor: =ocColorFacturation
+                              BorderStyle: =BorderStyle.None
+                              DisplayMode: =If( !IsBlank(ThisItem.gdc_id_product), DisplayMode.Edit,DisplayMode.Disabled)
+                              Icon: ="Delete"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Outline
+                              Layout: ='ButtonCanvas.Layout'.IconOnly
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnSelect: "=Set(\r\n    GraphQLQuery,\r\n    \"mutation removeArticles($ids: [UUID!]!) {\\n  contract {\\n    deleteArticles(ids: $ids)\\n    __typename\\n  }\\n}\\n\"\r\n);\r\n/*\r\n{\"operationName\":\"removeArticles\",\"variables\":{\"ids\":[\"a626f3ca-84aa-4f1d-894a-af9cbdd1f9de\"]},\"query\":\"mutation removeArticles($ids: [UUID!]!) {\\n  contract {\\n    deleteArticles(ids: $ids)\\n    __typename\\n  }\\n}\\n\"}\r\n*/\r\nSet(\r\n    GraphQLVariables,\r\n    \" {\"\"ids\"\":[\"\"\" & ThisItem.gdc_id_product & \"\"\"]\r\n    }\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\n/*\r\nRéponse\r\n{\r\n    \"data\": {\r\n        \"contract\": {\r\n            \"addArticles\": [\r\n                {\r\n                    \"id\": \"16eb0111-4bc8-462a-bea9-d5a1a41d4de4\",\r\n                    \"__typename\": \"ContractArticle\"\r\n                }\r\n            ],\r\n            \"__typename\": \"ContractMutation\"\r\n        }\r\n    }\r\n}\r\n*/\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\nPatch(\r\n    'oc_db.ressource_dpl',\r\n    {id_dpl: ThisItem.id_dpl,\r\n        \r\n        gdc_itemStatus: Blank(),\r\n        gdc_id_product: Blank()}\r\n);\r\nPatch(\r\n    clFacture,\r\n    LookUp(clFacture, id_dpl = ThisItem.id_dpl),\r\n     {   \r\n        gdc_itemStatus: Blank(),\r\n        gdc_id_product: Blank()}\r\n);\r\n"
+                              Width: =30
+                        - lbl_CMES_gal_Ressources_SiteNom_24:
+                            Control: Label@2.5.1
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              AutoHeight: =true
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =3
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =250
+                              OnSelect: |-
+                                =Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingTop
+                              Size: =9
+                              Text: =ThisItem.client_id_client_dynamics
+                              VerticalAlign: =VerticalAlign.Top
+                              Visible: =false
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_39.Width
+                              X: =lbl_CMES_gal_Ressources_Header_Site_39.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_39.Y
+                        - lbl_CMES_gal_Ressources_SiteNom_27:
+                            Control: Label@2.5.1
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Center
+                              AutoHeight: =true
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(71, 69, 64, 1)
+                              DisabledColor: =RGBA(186, 186, 186, 1)
+                              FillPortions: =3
+                              Font: =Font.'Open Sans'
+                              FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinWidth: =250
+                              OnSelect: |-
+                                =Set(visConContratBDC,false);
+                                Set(visConContratRessource,true);
+                              PaddingBottom: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingBottom
+                              PaddingLeft: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingLeft
+                              PaddingRight: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingRight
+                              PaddingTop: =lbl_CMES_gal_Ressources_Header_Site_39.PaddingTop
+                              Size: =9
+                              Text: =ThisItem.client_id_sophia_live
+                              VerticalAlign: =VerticalAlign.Top
+                              Visible: =false
+                              Width: =lbl_CMES_gal_Ressources_Header_Site_39.Width
+                              X: =lbl_CMES_gal_Ressources_Header_Site_39.X
+                              Y: =lbl_CMES_gal_Ressources_Header_Site_39.Y
+                        - CheckboxVU_2:
+                            Control: CheckBox@0.0.30
+                            Properties:
+                              Checked: =ThisItem.gdc_hidden
+                              Label: =
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              OnCheck: =
+                              OnSelect: |
+                                =Patch(
+                                    'oc_db.ressource_dpl',
+                                    {
+                                        id_dpl: ThisItem.id_dpl,
+                                        gdc_hidden: Not(ThisItem.gdc_hidden)
+                                    }
+                                );
+                                Patch(
+                                    clFacture,
+                                    LookUp(
+                                        clFacture,
+                                        id_dpl = ThisItem.id_dpl
+                                    ),
+                                    {gdc_hidden: Not(ThisItem.gdc_hidden)}
+                                );
+                              OnUncheck: =
+                              Width: =40
+                  - Rectangle11_5:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Fill: =ocColorFacturation
+                        Height: =1
+                        Width: =Parent.Width
+                        Y: =39
+      - TextCanvas15:
+          Control: Text@0.0.51
+          Properties:
+            Font: =Font.'Open Sans'
+            Height: =41
+            Size: =25
+            Text: ="A Facturer"
+            Width: =147
+            X: =989
+            Y: =21
+      - TextCanvas17:
+          Control: Text@0.0.51
+          Properties:
+            BorderStyle: =BorderStyle.Dashed
+            Height: =74
+            Text: =GraphQLResult
+            Visible: =tgl_Debug_Facture.Value
+            Width: =196
+            X: =1136
+            Y: =361
+      - tgl_Debug_Facture:
+          Control: Classic/Toggle@2.1.0
+          Properties:
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Color: =ocColorFacturation
+            Default: =ocDebug
+            FalseFill: =RGBA(202, 202, 202, 1)
+            FalseText: ="OC"
+            FocusedBorderThickness: =0
+            Font: =Font.'Open Sans'
+            Height: =20
+            OnCheck: =Set(ocDebug,true)
+            OnUncheck: =Set(ocDebug,false)
+            Size: =ocSize
+            TextPosition: =TextPosition.Left
+            TrueFill: =ocColorFacturation
+            TrueText: ="OC Debug"
+            Width: =If(Self.Value,105.27,65)
+            X: =4
+            Y: =736
+      - TxVérif1_14:
+          Control: Text@0.0.51
+          Group: Group9_1
+          Properties:
+            Align: ='TextCanvas.Align'.Start
+            AutoHeight: =true
+            FontColor: =If(IsBlank(gal_Facture.Selected.gdc_id_product) , Color.Green,Color.Red)
+            Height: =20
+            Text: ="Id Produit"
+            VerticalAlign: =VerticalAlign.Top
+            Width: =219
+            X: =1149
+            Y: =512
+      - TxVérif1_13:
+          Control: Text@0.0.51
+          Group: Group9_1
+          Properties:
+            Align: ='TextCanvas.Align'.Start
+            FontColor: =If(!IsBlank(gal_Facture.Selected.bdc_gdc_contractId) , Color.Green,Color.Red)
+            Height: =40
+            Text: =If(IsBlank( gal_Facture.Selected.bdc_gdc_contractName),"N° contrat",gal_Facture.Selected.bdc_gdc_contractName)
+            VerticalAlign: =VerticalAlign.Top
+            Width: =219
+            X: =1149
+            Y: =472
+      - TxVérif1_12:
+          Control: Text@0.0.51
+          Group: Group9_1
+          Properties:
+            Align: ='TextCanvas.Align'.Start
+            AutoHeight: =true
+            FontColor: =If(!IsBlank(gal_Facture.Selected.gdc_serviceId)  , Color.Green,Color.Red)
+            Height: =20
+            Text: ="Service"
+            VerticalAlign: =VerticalAlign.Top
+            Width: =219
+            X: =1147
+            Y: =542
+      - TxVérif1_11:
+          Control: Text@0.0.51
+          Group: Group9_1
+          Properties:
+            Align: ='TextCanvas.Align'.Start
+            AutoHeight: =true
+            FontColor: |-
+              =If((!IsBlank(gal_Facture.Selected.id_site_sophia_go) And !IsBlank(gal_Facture.Selected.site_site_nom_sophia)) Or !IsBlank(LookUp(
+                      'oc_db.site',
+                      id_sophia_go = gal_Facture.Selected.id_site_sophia_go
+                  ).site_nom_sophia) , Color.Green,Color.Red)
+            Height: =20
+            Text: ="Site Sophia"
+            VerticalAlign: =VerticalAlign.Top
+            Width: =219
+            X: =1147
+            Y: =565
+      - TxVérif1_10:
+          Control: Text@0.0.51
+          Group: Group9_1
+          Properties:
+            Align: ='TextCanvas.Align'.Start
+            AutoHeight: =true
+            FontColor: =If(!IsBlank(gal_Facture.Selected.bdc_gdc_invoicedEntityId) , Color.Green,Color.Red)
+            Height: =20
+            Text: ="Entité de facturation"
+            VerticalAlign: =VerticalAlign.Top
+            Width: =219
+            X: =1147
+            Y: =591
+      - TxVérif1_9:
+          Control: Text@0.0.51
+          Group: Group9_1
+          Properties:
+            Align: ='TextCanvas.Align'.Start
+            AutoHeight: =true
+            FontColor: =If(!IsBlank(gal_Facture.Selected.gdc_catalogRef), Color.Green,Color.Red)
+            Height: =20
+            Text: ="Ref Catalogue"
+            VerticalAlign: =VerticalAlign.Top
+            Width: =219
+            X: =1149
+            Y: =622
+      - TxVérif1_8:
+          Control: Text@0.0.51
+          Group: Group9_1
+          Properties:
+            Align: ='TextCanvas.Align'.Start
+            AutoHeight: =true
+            FontColor: =If(!IsBlank(gal_Facture.Selected.gdc_categoryId)  , Color.Green,Color.Red)
+            Height: =20
+            Text: ="Catégorie"
+            VerticalAlign: =VerticalAlign.Top
+            Width: =219
+            X: =1147
+            Y: =655
+      - lbl_ADV_FiltreCommercial_8:
+          Control: Label@2.5.1
+          Group: Group1
+          Properties:
+            Align: =Align.Right
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingRight: =10
+            Size: =12
+            Text: ="Bon de commande :"
+            Width: =200
+            X: =75
+            Y: =693
+      - ButtonCanvas12_5:
+          Control: Button@0.0.45
+          Group: Group1
+          Properties:
+            Align: =Align.Left
+            Appearance: ='ButtonCanvas.Appearance'.Transparent
+            BasePaletteColor: =ocColorFacturation
+            Font: =Font.'Open Sans'
+            FontColor: =RGBA(0, 0, 0, 1)
+            FontSize: =12
+            FontUnderline: =true
+            FontWeight: =FontWeight.Normal
+            Height: =22
+            OnSelect: =Launch("https://itsgroupsts.sharepoint.com/sites/Dynamics365SEWAN-CRM"&gal_Facture.Selected.bdc_opportunite_path&"/"&gal_Facture.Selected.bdc_file_name&"_signé.pdf")
+            Text: |-
+              =gal_Facture.Selected.bdc_file_name & "_signé.pdf" & If(
+                  !IsBlank(
+                      LookUp(
+                          clAnnules,
+                          id_bon_annule = gal_Facture.Selected.bdc_id_bon_de_commande
+                      )
+                  ),
+                  " (annulé par " & LookUp(
+                      clAnnules,
+                      id_bon_annule = gal_Facture.Selected.bdc_id_bon_de_commande
+                  ).numero_bdc_origine & ")",
+                  ""
+              )
+            Visible: =!IsBlank(gal_Facture.Selected)
+            Width: =1000
+            X: =286
+            Y: =697
+      - lbl_ADV_FiltreCommercial_14:
+          Control: Label@2.5.1
+          Group: Group1
+          Properties:
+            Align: =Align.Right
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =34
+            PaddingRight: =10
+            Size: =12
+            Text: ="Client :"
+            Width: =200
+            X: =75
+            Y: =713
+      - ButtonCanvas12_6:
+          Control: Button@0.0.45
+          Group: Group1
+          Properties:
+            Align: =Align.Left
+            Appearance: ='ButtonCanvas.Appearance'.Transparent
+            BasePaletteColor: =ocColorFacturation
+            FontSize: =12
+            FontUnderline: =true
+            Height: =23
+            OnSelect: |-
+              =/*Set(varUrlClient;LookUp(
+                                  'oc_db.client';
+                                  id_client_dynamics = gal_Facture.Selected.bdc_dynamics_account_id
+                              ).id_sophia_live);;
+
+
+              Launch("https://sophia3.sewan.fr/p"& varUrlClient &"/sites");;*/
+
+              Launch("https://sophia3.sewan.fr/go/admin/orgs/org/"&gal_Facture.Selected.bdc_gdc_invoicedEntityId);
+            Text: =gal_Facture.Selected.bdc_per_name
+            Visible: =!IsBlank(gal_Facture.Selected)
+            Width: =850
+            X: =286
+            Y: =718
+      - lbl_ADV_FiltreCommercial_15:
+          Control: Label@2.5.1
+          Group: Group1
+          Properties:
+            Align: =Align.Right
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            PaddingRight: =10
+            Size: =12
+            Text: ="Contrat :"
+            Width: =200
+            X: =75
+            Y: =738
+      - ButtonCanvas12_7:
+          Control: Button@0.0.45
+          Group: Group1
+          Properties:
+            Align: =Align.Left
+            Appearance: ='ButtonCanvas.Appearance'.Transparent
+            BasePaletteColor: =ocColorFacturation
+            Font: =Font.'Open Sans'
+            FontColor: =RGBA(0, 0, 0, 1)
+            FontSize: =12
+            FontUnderline: =true
+            Height: =23
+            OnSelect: |+
+              =
+              Launch("https://sophia3.sewan.fr/go/admin/contracts/8f19e50e-1be4-48b7-8c2a-6d0c477ff141/contract/" & gal_Facture.Selected.bdc_gdc_contractId & "?tab=articles");
+            Text: =gal_Facture.Selected.bdc_gdc_contractName
+            VerticalAlign: =VerticalAlign.Middle
+            Visible: =!IsBlank(gal_Facture.Selected)
+            Width: =850
+            X: =286
+            Y: =741
+      - ContContratBDC_1:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Height: =317
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: |+
+              =
+              varVisibleChoixContrat
+
+
+            Width: =219
+            X: =1137
+            Y: =130
+          Children:
+            - txtContratVal_1:
+                Control: TextInput@0.0.54
+                Properties:
+                  Height: =30
+                  Value: =gal_Facture.Selected.bdc_contrat_cadre
+                  Width: =141
+                  X: =12
+                  Y: =50
+            - Icon26_3:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =26
+                  Icon: =Icon.Search
+                  OnSelect: |-
+                    =Set(
+                        GraphQLQuery,
+                        "query Contracts($organizationId: UUID!, $pagination: Pagination, $status: [ContractStatus!], $period: Period, $search: String, $sort: [ContractSortItem!]) {\n  contract {\n    list(\n      organizationId: $organizationId\n      pagination: $pagination\n      status: $status\n      period: $period\n      search: $search\n      sort: $sort\n    ) {\n      edges {\n        id\n        contractNumber\n        lastUpdate\n        status\n        client {\n          id\n          name\n          internalReference\n          __typename\n        }\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                    );
+                    Set(
+                        GraphQLVariables,
+                        "{""organizationId"":""8f19e50e-1be4-48b7-8c2a-6d0c477ff141"",""pagination"":{""page"":1,""limit"":25},""status"":[],""period"":{},""search"":""" & txtContratVal_1.Value & """,""sort"":[{""id"":""name"",""desc"":false}]}"
+                    );
+                    Set(
+                        GraphQLBody,
+                        "{""query"": """ & GraphQLQuery & """ ,
+                      ""variables"": " & GraphQLVariables & "
+                    }"
+                    );
+                    Set(
+                        GraphQLResult,
+                        GraphQL.Run(GraphQLBody).reponse
+                    );
+                    Set(
+                        varJson,
+                        ParseJSON(GraphQLResult)
+                    );
+                    /*
+                    ClearCollect(
+                        MyCollection;
+                        ShowColumns(
+                            Filter(
+                                ForAll(
+                                    Table(varJson.data.search.search.edges);
+                                    With(
+                                        {
+                                            record: Value;
+                                            breadcrumbNamesList: ForAll(
+                                                Table(record.breadcrumbNames);
+                                                Text(Value)
+                                            )
+                                        };
+                                        {
+                                            id: Text(record.id);
+                                            name: Text(record.name);
+                                            category: Text(record.category);
+                                            breadcrumbNames: breadcrumbNamesList
+                                        }
+                                    )
+                                );
+                                category = "organization" && CountIf(breadcrumbNames; Value = "Sewan Entreprise") > 0
+                            );
+                            "id";
+                            "name"
+                        )
+                    )
+                    */
+                    /*
+                        ClearCollect(
+                            cl_Organization;
+                            ForAll(
+                                Table(varJson.data.search.search.edges);
+                                {
+                                    id: Value.id;
+                                    name: Value.name;
+                                    type: Value.type;
+                                    category: Value.category;
+                                    breadcrumbNames: Concat(Value.breadcrumbNames;Value;" > ")
+                                }
+                            )
+                        );;
+                        */
+                    ClearCollect(
+                        cl_ContratGO,
+                        ForAll(
+                            Table(varJson.data.contract.list.edges),
+                            With(
+                                {
+                                    id: ThisRecord.Value.id,
+                                    contractNumber: ThisRecord.Value.contractNumber & " - " & ThisRecord.Value.client.name,
+                                    status: ThisRecord.Value.status,
+                                    clientid: ThisRecord.Value.client.id,
+                                    clientname: ThisRecord.Value.client.name
+                                },
+                                {
+                                    id: id,
+                                    contractNumber: contractNumber,
+                                    status: status,
+                                    clientid: clientid,
+                                    clientname: clientname
+                                }
+                            )
+                        )
+                    )
+                  Width: =35
+                  X: =171
+                  Y: =50
+            - drp_contratGo_1:
+                Control: Classic/DropDown@2.3.1
+                Properties:
+                  AllowEmptySelection: =true
+                  BorderColor: =ocColorFacturation
+                  ChevronBackground: =ocColorFacturation
+                  ChevronFill: =RGBA(255, 255, 255, 1)
+                  ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                  ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                  Default: =First(cl_ContratGO).contractNumber
+                  FocusedBorderThickness: =2
+                  Font: =Font.'Open Sans'
+                  Height: =25
+                  HoverFill: =Self.SelectionFill
+                  Items: =cl_ContratGO
+                  Items.Value: =contractNumber
+                  OnChange: =
+                  PressedColor: =RGBA(0, 0, 0, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  SelectionColor: =RGBA(0, 0, 0, 1)
+                  SelectionFill: =RGBA(104, 151, 111, 0.19)
+                  Size: =10
+                  Width: =161
+                  X: =12
+                  Y: =101
+            - ico_enreg_client_5:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =31
+                  Icon: =Icon.Save
+                  OnSelect: "=Patch(\n    'oc_db.bon_de_commande',\n    {\n        id_bon_de_commande: gal_Facture.Selected.bdc_id_bon_de_commande,\n        gdc_contractId: Text(drp_contratGo_1.Selected.id),\n        gdc_invoicedEntityId: Text(drp_contratGo_1.Selected.clientid),\n        gdc_contractName: Text(drp_contratGo_1.Selected.contractNumber),\n        id_sophia_go_facturation: Text(drp_contratGo_1.Selected.clientid),\n        nom_sophia_facturation: Text(drp_contratGo_1.Selected.clientname)\n    }\n);\nPatch(\n    clFacture,LookUp(clFacture,id_dpl = gal_Facture.Selected.id_dpl),\n    {\n        \n        bdc_id_bon_de_commande: gal_Facture.Selected.bdc_id_bon_de_commande,\n        bdc_gdc_contractId: Text(drp_contratGo_1.Selected.id),\n        bdc_gdc_invoicedEntityId: Text(drp_contratGo_1.Selected.clientid),\n        bdc_gdc_contractName: Text(drp_contratGo_1.Selected.contractNumber),\n        bdc_id_sophia_go_facturation: Text(drp_contratGo_1.Selected.clientid),\n        bdc_nom_sophia_facturation: Text(drp_contratGo_1.Selected.clientname)\n    }\n);\nPatch(\n    'oc_db.entite',\n    LookUp('oc_db.entite',id_entite =  gal_Facture.Selected.bdc_id_entite_facturation),\n    {\n        \n        id_sophia_go: Text(drp_contratGo_1.Selected.clientid),\n        nom_sophia_go: Text(drp_contratGo_1.Selected.clientname)\n    }\n);\n\nIf(!IsBlank( gal_Facture.Selected.id_site_sophia_go),\n\nSet(\n    GraphQLQuery,\n    \"query ExampleQuery($getSiteId: ID!) { site { getSite(id: $getSiteId) { organization { parentHierarchy { id name } sites { name } } } } }\"\n);\nSet(\n    GraphQLVariables,\n    \"{\"\"getSiteId\"\":\"\"\" & gal_Facture.Selected.id_site_sophia_go & \"\"\"}\"\n);\nSet(\n    GraphQLBody1,\n    \"{\"\"operationName\"\":\"\"ExampleQuery\"\", \"\"query\"\": \"\"\" & GraphQLQuery & \"\"\", \"\"variables\"\": \" & GraphQLVariables & \"}\"\n);\nSet(\n    GraphQLResult1,\n    GraphQL.Run(GraphQLBody1).reponse\n);\n\n\n\n\n    Set(\n        GraphQLQuery,\n        \"query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\\n  site {\\n    getSites(\\n      organizationId: $organizationId\\n      internalRecursive: $internalRecursive\\n      pagination: $pagination\\n      filters: $filters\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        address {\\n          street\\n          zipCode\\n          city\\n          country\\n          complement\\n          __typename\\n        }\\n        identityCount\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\n    );\n    Set(\n        GraphQLVariables,\n        \"{\"\"organizationId\"\":\"\"\" & Text(drp_contratGo_1.Selected.clientid) & \"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":3000},\"\"internalRecursive\"\":true}\"\n    );\n    Set(\n        GraphQLBody,\n        \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\n  \"\"variables\"\": \" & GraphQLVariables & \"\n}\"\n    );\n    Set(\n        GraphQLResult,\n        GraphQL.Run(GraphQLBody).reponse\n    );\n    Set(\n        varJson,\n        ParseJSON(GraphQLResult)\n    );\n)"
+                  Width: =30
+                  X: =183
+                  Y: =101
+            - Label21_2:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =ocColorFacturation
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =37
+                  Text: ="Contrat"
+                  Width: =219
+            - TextCanvas16_3:
+                Control: Text@0.0.51
+                Properties:
+                  Height: =101
+                  Text: |-
+                    =drp_contratGo_1.Selected.clientname &  Char(10) & drp_contratGo_1.Selected.id & Char(10) & "Statut: " & drp_contratGo_1.Selected.status
+                  VerticalAlign: =VerticalAlign.Top
+                  Width: =194
+                  X: =12
+                  Y: =143
+            - Icon9_1:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(0, 18, 107, 1)
+                  Height: =30
+                  Icon: =Icon.Add
+                  OnSelect: =Launch("https://sophia3.sewan.fr/go/admin/contracts/8f19e50e-1be4-48b7-8c2a-6d0c477ff141/create-contract")
+                  Width: =30
+                  X: =183
+                  Y: =132
+      - Icon19_7:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =18
+            Icon: =Icon.Database
+            OnSelect: |
+              =Set(
+                  varVisibleChoixIdSophiaSite,
+                  true
+              );
+              Set(
+                  CMES_client2,
+                  Blank()
+              );
+              Set(
+                  CMES_client3,
+                  Blank()
+              );
+              Set(
+                  CMES_client4,
+                  Blank()
+              );
+              Set(
+                  varLoadingChoixIdSophiaSite,
+                  true
+              );
+              Reset(TextInputCanvas9_4);
+              If(
+                  gal_Facture.Selected.client_id_sophia_go in [
+                      Blank(),
+                      ""
+                  ] && !IsBlank(gal_Facture.Selected.bdc_id_sophia_go_facturation),
+                  Set(
+                      GraphQLQuery,
+                      "query Organization($perId: String!) {\n  organization {\n    getOrganizationFromLive(perId: $perId) {\n      id\n      type\n      __typename\n    }\n    __typename\n  }\n}\n"
+                  );
+                  Set(
+                      GraphQLVariables,
+                      "{""perId"":""" & gal_Facture.Selected.client_id_sophia_live & """}"
+                  );
+                  Set(
+                      GraphQLBody,
+                      "{""query"": """ & GraphQLQuery & """ ,
+                ""variables"": " & GraphQLVariables & "
+              }"
+                  );
+                  Set(
+                      GraphQLResult,
+                      GraphQL.Run(GraphQLBody).reponse
+                  );
+                  Set(
+                      varJson,
+                      ParseJSON(GraphQLResult)
+                  );
+                  Set(
+                      CMES_client,
+                      Patch(
+                          'oc_db.client',
+                          {
+                              id_client_dynamics: gal_Facture.Selected.client_id_client_dynamics,
+                              id_sophia_go: Text(varJson.data.organization.getOrganizationFromLive.id),
+                              id_sophia_live: gal_Facture.Selected.client_id_sophia_live
+                          }
+                      )
+                  )
+              );
+              Set(
+                  GraphQLQuery,
+                  "query TableOrganizations($organizationId: ID!, $pagination: Pagination, $filters: OrganizationFilters, $sortFields: [String], $withStats: Boolean = false) {\n  organization {\n    getOrganizations(\n      parentOrganizationId: $organizationId\n      filters: $filters\n      pagination: $pagination\n      sortFields: $sortFields\n    ) {\n      edges {\n        id\n        name\n        locale\n        type\n        roles {\n          id\n          name\n          __typename\n        }\n        contact {\n          id\n          firstName\n          lastName\n          __typename\n        }\n        internalOrganization\n        siteCount\n        identityCount\n        address {\n          city\n          country\n          street\n          zipCode\n          __typename\n        }\n        referents {\n          firstName\n          identityId\n          lastName\n          label\n          __typename\n        }\n        services {\n          id\n          name\n          __typename\n        }\n        createdAt\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    getStats(parentOrganizationId: $organizationId) @include(if: $withStats) {\n      reseller\n      customer\n      internal\n      total\n      __typename\n    }\n    __typename\n  }\n}\n"
+              );
+              Set(
+                  GraphQLVariables,
+                  "{""organizationId"":""" & gal_Facture.Selected.bdc_id_sophia_go_facturation & """,""pagination"":{""page"":1,""limit"":3000}}"
+              );
+              Set(
+                  GraphQLBody,
+                  "{""query"": """ & GraphQLQuery & """ ,
+                ""variables"": " & GraphQLVariables & "
+              }"
+              );
+              Set(
+                  GraphQLResult,
+                  GraphQL.Run(GraphQLBody).reponse
+              );
+              Set(
+                  varJson,
+                  ParseJSON(GraphQLResult)
+              );
+              ClearCollect(
+                  cl_Organizations,
+                  ForAll(
+                      Table(varJson.data.organization.getOrganizations.edges),
+                      {
+                          id: Text(ThisRecord.Value.id),
+                          name: Text(ThisRecord.Value.name),
+                          type: Text(ThisRecord.Value.type),
+                          __typename: Text(ThisRecord.Value.__typename),
+                          city: Text(ThisRecord.Value.address.city),
+                          street: Text(ThisRecord.Value.address.street),
+                          zipCode: Text(ThisRecord.Value.address.zipCode),
+                          siteCount: Value(ThisRecord.Value.siteCount)
+                      }
+                  )
+              );
+              Set(
+                  GraphQLQuery,
+                  "query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\n  site {\n    getSites(\n      organizationId: $organizationId\n      internalRecursive: $internalRecursive\n      pagination: $pagination\n      filters: $filters\n      sortFields: $sortFields\n    ) {\n      edges {\n        id\n        name\n        address {\n          street\n          zipCode\n          city\n          country\n          complement\n          __typename\n        }\n        identityCount\n        createdAt\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+              );
+              Set(
+                  GraphQLVariables,
+                  "{""organizationId"":""" & gal_Facture.Selected.bdc_id_sophia_go_facturation & """,""pagination"":{""page"":1,""limit"":2000},""internalRecursive"":true}"
+              );
+              Set(
+                  GraphQLBody,
+                  "{""query"": """ & GraphQLQuery & """ ,
+                ""variables"": " & GraphQLVariables & "
+              }"
+              );
+              Set(
+                  GraphQLResult,
+                  GraphQL.Run(GraphQLBody).reponse
+              );
+              Set(
+                  varJson,
+                  ParseJSON(GraphQLResult)
+              );
+              Collect(
+                  cl_Organizations,
+                  ForAll(
+                      Table(varJson.data.site.getSites.edges),
+                      {
+                          id: Text(ThisRecord.Value.id),
+                          name: Text(ThisRecord.Value.name),
+                          __typename: Text(ThisRecord.Value.__typename),
+                          city: Text(ThisRecord.Value.address.city),
+                          street: Text(ThisRecord.Value.address.street),
+                          zipCode: Text(ThisRecord.Value.address.zipCode),
+                          complement: Text(ThisRecord.Value.address.complement),
+                          siteCount: 0
+                      }
+                  )
+              );
+              Set(
+                  CMES_OrganizationSite,
+                  Blank()
+              );
+              Clear(cl_Site_CMES);
+              Set(
+                  varLoadingChoixIdSophiaSite,
+                  false
+              );
+            Tooltip: ="Choisir un site existant sur Sophia pour ce client"
+            Visible: =!IsBlank( gal_Facture.Selected.bdc_gdc_contractName)
+            Width: =18
+            X: =1121
+            Y: =566
+      - Container29_4:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Bold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Min(If(varLoadingChoixIdSophiaSite, Spinner4_4.Height,Gallery13_4.Height) + Label42_8.Height+TextInputCanvas9_4.Height+Container12_2.Height,325)
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Visible: =varVisibleChoixIdSophiaSite
+            Width: =467
+            X: =55
+            Y: =350
+          Children:
+            - Label42_8:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =ocColorFacturation
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: =33
+                  Text: ="Sélectionnez l'ID Sophia du site"
+                  Width: =467
+            - Icon21_8:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Height: =23
+                  Icon: =Icon.Cancel
+                  OnSelect: |-
+                    =Set(varVisibleChoixIdSophiaSite,false);
+                    Set(
+                                CMES_OrganizationSite,
+                                Blank()
+                            );
+                    Clear(cl_Site_CMES);
+                    Reset(TextInputCanvas9_4)
+                  Width: =23
+                  X: =428
+                  Y: =5
+            - TextInputCanvas9_4:
+                Control: TextInput@0.0.54
+                Properties:
+                  Appearance: ='TextInputCanvas.Appearance'.FilledLighter
+                  BasePaletteColor: =ocColorFacturation
+                  BorderColor: =ocColorFacturation
+                  BorderStyle: =BorderStyle.Solid
+                  BorderThickness: =1
+                  DisplayMode: =If(varLoadingChoixIdSophiaSite,DisplayMode.Disabled,DisplayMode.Edit)
+                  OnChange: "=Clear(cl_Site_CMES);\r\n/*\r\nIf(Trim(Self.Value) <> \"\" && !IsBlank(CMES_client.id_sophia_go) &&  IsEmpty(Search(Gallery13_1.AllItems;Self.Value;name;adresse;type));\r\nSet(varLoadingChoixIdSophiaSite;true);;\r\nSet(\r\n    GraphQLQuery;\r\n    \"query search($query: String!, $ownerId: ID, $uiCategories: [String], $limit: Int, $page: Int, $categories: [String]) {\\n  search {\\n    search(\\n      query: $query\\n      ownerId: $ownerId\\n      uiCategories: $uiCategories\\n      pagination: {limit: $limit, page: $page}\\n      categories: $categories\\n    ) {\\n      edges {\\n        id\\n        name\\n        category\\n        uiCategory\\n        meta\\n        alternate\\n        urn\\n        breadcrumbNames\\n        breadcrumbUuids\\n        __typename\\n      }\\n      count\\n      pageInfo {\\n        page\\n        nbPage\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);;\r\n\r\nSet(\r\n    GraphQLVariables;\r\n    \"{\"\"ownerId\"\":\"\"\"&CMES_client.id_sophia_go&\"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":5000,\"\"sortFields\"\":[\"\"name\"\"]},\"\"query\"\":\"\"\"&Self.Value&\"\"\",\"\"categories\"\":[\"\"site\"\"]}\"\r\n);;\r\nSet(\r\n    GraphQLBody;\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);;\r\nSet(\r\n    GraphQLResult;\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);;\r\nSet(\r\n    varJson;\r\n    ParseJSON(GraphQLResult)\r\n);;\r\n\r\nClearCollect(\r\n    cl_Organizations;\r\n    ForAll(\r\n        Table(varJson.data.search.search.edges);\r\n        {\r\n                id: Text(ThisRecord.Value.id);\r\n                name: Text(ThisRecord.Value.name);\r\n                type: Text(ThisRecord.Value.uiCategory);\r\n                __typename: Text(ThisRecord.Value.category);\r\n                meta: Concat(ForAll(Table(ThisRecord.Value.meta) As MetaData;Text(MetaData.Value));Value;\" \")\r\n        }\r\n        )\r\n);;\r\nSet(varLoadingChoixIdSophiaSite;false)\r\n;\r\n\r\nSet(varLoadingChoixIdSophiaSite;true);;\r\n\r\nIf(CMES_client.id_sophia_go in [Blank();\"\"] && !IsBlank(CMES_client.id_sophia_live);Set(\r\n    GraphQLQuery;\r\n    \"query Organization($perId: String!) {\\n  organization {\\n    getOrganizationFromLive(perId: $perId) {\\n      id\\n      type\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);;\r\n\r\nSet(\r\n    GraphQLVariables;\r\n    \"{\"\"perId\"\":\"\"\"&CMES_client.id_sophia_live&\"\"\"}\"\r\n);;\r\nSet(\r\n    GraphQLBody;\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);;\r\nSet(\r\n    GraphQLResult;\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);;\r\nSet(\r\n    varJson;\r\n    ParseJSON(GraphQLResult)\r\n);;\r\nSet(CMES_client;\r\nPatch('oc_db.client';CMES_client;{id_sophia_go:Text(varJson.data.organization.getOrganizationFromLive.id)}))\r\n\r\n);;\r\n\r\n\r\nSet(\r\n    GraphQLQuery;\r\n    \"query TableOrganizations($organizationId: ID!, $pagination: Pagination, $filters: OrganizationFilters, $sortFields: [String], $withStats: Boolean = false) {\\n  organization {\\n    getOrganizations(\\n      parentOrganizationId: $organizationId\\n      filters: $filters\\n      pagination: $pagination\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        locale\\n        type\\n        roles {\\n          id\\n          name\\n          __typename\\n        }\\n        contact {\\n          id\\n          firstName\\n          lastName\\n          __typename\\n        }\\n        internalOrganization\\n        siteCount\\n        identityCount\\n        address {\\n          city\\n          country\\n          street\\n          zipCode\\n          __typename\\n        }\\n        referents {\\n          firstName\\n          identityId\\n          lastName\\n          label\\n          __typename\\n        }\\n        services {\\n          id\\n          name\\n          __typename\\n        }\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    getStats(parentOrganizationId: $organizationId) @include(if: $withStats) {\\n      reseller\\n      customer\\n      internal\\n      total\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);;\r\n\r\nSet(\r\n    GraphQLVariables;\r\n    \"{\"\"organizationId\"\":\"\"\" & CMES_client.id_sophia_go&\"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":3000}}\"\r\n);;\r\nSet(\r\n    GraphQLBody;\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);;\r\nSet(\r\n    GraphQLResult;\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);;\r\nSet(\r\n    varJson;\r\n    ParseJSON(GraphQLResult)\r\n);;\r\n\r\nClearCollect(\r\n    cl_Organizations;\r\n    ForAll(\r\n        Table(varJson.data.organization.getOrganizations.edges);\r\n        {\r\n                id: Text(ThisRecord.Value.id);\r\n                name: Text(ThisRecord.Value.name);\r\n                type: Text(ThisRecord.Value.type);\r\n                __typename: Text(ThisRecord.Value.__typename);\r\n                city: Text(ThisRecord.Value.address.city);\r\n                street: Text(ThisRecord.Value.address.street);\r\n                zipCode: Text(ThisRecord.Value.address.zipCode);\r\n                siteCount: Value(ThisRecord.Value.siteCount)\r\n        }\r\n            \r\n        )\r\n);;\r\n\r\nSet(\r\n    GraphQLQuery;\r\n    \"query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\\n  site {\\n    getSites(\\n      organizationId: $organizationId\\n      internalRecursive: $internalRecursive\\n      pagination: $pagination\\n      filters: $filters\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        address {\\n          street\\n          zipCode\\n          city\\n          country\\n          complement\\n          __typename\\n        }\\n        identityCount\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);;\r\nSet(\r\n    GraphQLVariables;\r\n    \"{\"\"organizationId\"\":\"\"\" & CMES_client.id_sophia_go & \"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":2000},\"\"internalRecursive\"\":true}\"\r\n);;\r\nSet(\r\n    GraphQLBody;\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);;\r\nSet(\r\n    GraphQLResult;\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);;\r\nSet(\r\n    varJson;\r\n    ParseJSON(GraphQLResult)\r\n);;\r\n\r\nCollect(\r\n    cl_Organizations;\r\n    ForAll(\r\n        Table(varJson.data.site.getSites.edges);\r\n            {\r\n                id: Text(ThisRecord.Value.id);\r\n                name: Text(ThisRecord.Value.name);\r\n                __typename:  Text(ThisRecord.Value.__typename);\r\n                city: Text(ThisRecord.Value.address.city);\r\n                street: Text(ThisRecord.Value.address.street);\r\n                zipCode: Text(ThisRecord.Value.address.zipCode);\r\n                complement: Text(ThisRecord.Value.address.complement);\r\n                siteCount: 0\r\n\r\n            }\r\n        \r\n    )\r\n);;\r\n\r\nSet(\r\n            CMES_OrganizationSite;\r\n            Blank()\r\n        );;\r\n        Clear(cl_Site_CMES);;\r\n\r\n\r\n\r\nSet(varLoadingChoixIdSophiaSite;false)\r\n\r\n\r\n\r\n\r\n)*/\r\n\r\n"
+                  Placeholder: |-
+                    ="Rechercher un site de " & If(
+                        CMES_Ressource_1.client_nom_sophia in [
+                            Blank(),
+                            ""
+                        ],
+                        CMES_Ressource_1.client_nom_dynamics,
+                        CMES_Ressource_1.client_nom_sophia
+                    ) & If(
+                        !IsBlank(CMES_client2),
+                        " > " & CMES_client2.name
+                    ) & If(
+                        !IsBlank(CMES_client3),
+                        " > " & CMES_client3.name
+                    ) & If(
+                        !IsBlank(CMES_client4),
+                        " > " & CMES_client4.name
+                    )
+                  TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
+                  Width: =Parent.Width
+                  Y: =Container12_2.Height + Container12_2.Y
+            - Container12_2:
+                Control: GroupContainer@1.4.0
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ocColorFacturation
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(199, 199, 199, 0.25)
+                  Height: =If(IsBlank(CMES_client2.name),0, 25)
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =467
+                  Y: =Label42_8.Height
+                Children:
+                  - ButtonCanvas21_2:
+                      Control: Button@0.0.45
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        BasePaletteColor: =ocColorFacturation
+                        FillPortions: =1
+                        FontSize: =11
+                        FontUnderline: =true
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        LayoutMinWidth: =40
+                        OnSelect: "=Set(varLoadingChoixIdSophiaSite,true);\r\nSet(CMES_client2,Blank());\r\nSet(CMES_client3,Blank());\r\nSet(CMES_client4,Blank());\r\n\r\nReset(TextInputCanvas9_4);\r\n\r\nIf(CMES_client.id_sophia_go in [Blank(),\"\"] && !IsBlank(CMES_client.id_sophia_live),Set(\r\n    GraphQLQuery,\r\n    \"query Organization($perId: String!) {\\n  organization {\\n    getOrganizationFromLive(perId: $perId) {\\n      id\\n      type\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);\r\n\r\nSet(\r\n    GraphQLVariables,\r\n    \"{\"\"perId\"\":\"\"\"&CMES_client.id_sophia_live&\"\"\"}\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\nSet(CMES_client,\r\nPatch('oc_db.client',CMES_client,{id_sophia_go:Text(varJson.data.organization.getOrganizationFromLive.id)}))\r\n\r\n);\r\n\r\n\r\nSet(\r\n    GraphQLQuery,\r\n    \"query TableOrganizations($organizationId: ID!, $pagination: Pagination, $filters: OrganizationFilters, $sortFields: [String], $withStats: Boolean = false) {\\n  organization {\\n    getOrganizations(\\n      parentOrganizationId: $organizationId\\n      filters: $filters\\n      pagination: $pagination\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        locale\\n        type\\n        roles {\\n          id\\n          name\\n          __typename\\n        }\\n        contact {\\n          id\\n          firstName\\n          lastName\\n          __typename\\n        }\\n        internalOrganization\\n        siteCount\\n        identityCount\\n        address {\\n          city\\n          country\\n          street\\n          zipCode\\n          __typename\\n        }\\n        referents {\\n          firstName\\n          identityId\\n          lastName\\n          label\\n          __typename\\n        }\\n        services {\\n          id\\n          name\\n          __typename\\n        }\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    getStats(parentOrganizationId: $organizationId) @include(if: $withStats) {\\n      reseller\\n      customer\\n      internal\\n      total\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);\r\n\r\nSet(\r\n    GraphQLVariables,\r\n    \"{\"\"organizationId\"\":\"\"\" & CMES_client.id_sophia_go&\"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":3000}}\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\n\r\nClearCollect(\r\n    cl_Organizations,\r\n    ForAll(\r\n        Table(varJson.data.organization.getOrganizations.edges),\r\n        {\r\n                id: Text(ThisRecord.Value.id),\r\n                name: Text(ThisRecord.Value.name),\r\n                type: Text(ThisRecord.Value.type),\r\n                __typename: Text(ThisRecord.Value.__typename),\r\n                city: Text(ThisRecord.Value.address.city),\r\n                street: Text(ThisRecord.Value.address.street),\r\n                zipCode: Text(ThisRecord.Value.address.zipCode),\r\n                siteCount: Value(ThisRecord.Value.siteCount)\r\n        }\r\n            \r\n        )\r\n);\r\n\r\nSet(\r\n    GraphQLQuery,\r\n    \"query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\\n  site {\\n    getSites(\\n      organizationId: $organizationId\\n      internalRecursive: $internalRecursive\\n      pagination: $pagination\\n      filters: $filters\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        address {\\n          street\\n          zipCode\\n          city\\n          country\\n          complement\\n          __typename\\n        }\\n        identityCount\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);\r\nSet(\r\n    GraphQLVariables,\r\n    \"{\"\"organizationId\"\":\"\"\" & CMES_client.id_sophia_go & \"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":2000},\"\"internalRecursive\"\":true}\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\n\r\nCollect(\r\n    cl_Organizations,\r\n    ForAll(\r\n        Table(varJson.data.site.getSites.edges),\r\n            {\r\n                id: Text(ThisRecord.Value.id),\r\n                name: Text(ThisRecord.Value.name),\r\n                __typename:  Text(ThisRecord.Value.__typename),\r\n                city: Text(ThisRecord.Value.address.city),\r\n                street: Text(ThisRecord.Value.address.street),\r\n                zipCode: Text(ThisRecord.Value.address.zipCode),\r\n                complement: Text(ThisRecord.Value.address.complement),\r\n                siteCount: 0\r\n\r\n            }\r\n        \r\n    )\r\n);\r\n\r\nSet(\r\n            CMES_OrganizationSite,\r\n            Blank()\r\n        );\r\n        Clear(cl_Site_CMES);\r\n\r\n\r\n\r\nSet(varLoadingChoixIdSophiaSite,false);\r\n"
+                        Text: =If(CMES_Ressource_1.client_nom_sophia in [Blank(),""],CMES_Ressource_1.client_nom_dynamics,CMES_Ressource_1.client_nom_sophia)
+                  - TextCanvas16_8:
+                      Control: Text@0.0.51
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =Parent.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        Text: =">"
+                        Visible: =!IsBlank(CMES_client2)
+                        Width: =10
+                  - ButtonCanvas21_8:
+                      Control: Button@0.0.45
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        BasePaletteColor: =ocColorFacturation
+                        FillPortions: =1
+                        FontSize: =11
+                        FontUnderline: =true
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        LayoutMinWidth: =40
+                        OnSelect: "=Set(varLoadingChoixIdSophiaSite,true);\r\nSet(tmp_CMES_client,CMES_client2);\r\nSet(CMES_client3,Blank());\r\nSet(CMES_client4,Blank());\r\n\r\nReset(TextInputCanvas9_4);\r\n\r\nSet(varLoadingChoixIdSophiaSite,true);\r\n\r\nSet(\r\n    GraphQLQuery,\r\n    \"query TableOrganizations($organizationId: ID!, $pagination: Pagination, $filters: OrganizationFilters, $sortFields: [String], $withStats: Boolean = false) {\\n  organization {\\n    getOrganizations(\\n      parentOrganizationId: $organizationId\\n      filters: $filters\\n      pagination: $pagination\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        locale\\n        type\\n        roles {\\n          id\\n          name\\n          __typename\\n        }\\n        contact {\\n          id\\n          firstName\\n          lastName\\n          __typename\\n        }\\n        internalOrganization\\n        siteCount\\n        identityCount\\n        address {\\n          city\\n          country\\n          street\\n          zipCode\\n          __typename\\n        }\\n        referents {\\n          firstName\\n          identityId\\n          lastName\\n          label\\n          __typename\\n        }\\n        services {\\n          id\\n          name\\n          __typename\\n        }\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    getStats(parentOrganizationId: $organizationId) @include(if: $withStats) {\\n      reseller\\n      customer\\n      internal\\n      total\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);\r\n\r\nSet(\r\n    GraphQLVariables,\r\n    \"{\"\"organizationId\"\":\"\"\" & tmp_CMES_client.id&\"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":3000}}\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\n\r\nClearCollect(\r\n    cl_Organizations,\r\n    ForAll(\r\n        Table(varJson.data.organization.getOrganizations.edges),\r\n        {\r\n                id: Text(ThisRecord.Value.id),\r\n                name: Text(ThisRecord.Value.name),\r\n                type: Text(ThisRecord.Value.type),\r\n                __typename: Text(ThisRecord.Value.__typename),\r\n                city: Text(ThisRecord.Value.address.city),\r\n                street: Text(ThisRecord.Value.address.street),\r\n                zipCode: Text(ThisRecord.Value.address.zipCode),\r\n                siteCount: Value(ThisRecord.Value.siteCount)\r\n        }\r\n            \r\n        )\r\n);\r\n\r\nSet(\r\n    GraphQLQuery,\r\n    \"query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\\n  site {\\n    getSites(\\n      organizationId: $organizationId\\n      internalRecursive: $internalRecursive\\n      pagination: $pagination\\n      filters: $filters\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        address {\\n          street\\n          zipCode\\n          city\\n          country\\n          complement\\n          __typename\\n        }\\n        identityCount\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);\r\nSet(\r\n    GraphQLVariables,\r\n    \"{\"\"organizationId\"\":\"\"\" & tmp_CMES_client.id & \"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":3000},\"\"internalRecursive\"\":true}\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\n\r\nCollect(\r\n    cl_Organizations,\r\n    ForAll(\r\n        Table(varJson.data.site.getSites.edges),\r\n            {\r\n                id: Text(ThisRecord.Value.id),\r\n                name: Text(ThisRecord.Value.name),\r\n                __typename:  Text(ThisRecord.Value.__typename),\r\n                city: Text(ThisRecord.Value.address.city),\r\n                street: Text(ThisRecord.Value.address.street),\r\n                zipCode: Text(ThisRecord.Value.address.zipCode),\r\n                complement: Text(ThisRecord.Value.address.complement),\r\n                siteCount: 0\r\n\r\n            }\r\n        \r\n    )\r\n);\r\n\r\nSet(\r\n            CMES_OrganizationSite,\r\n            Blank()\r\n        );\r\n        Clear(cl_Site_CMES);\r\n\r\n\r\n\r\nSet(varLoadingChoixIdSophiaSite,false);"
+                        Text: =CMES_client2.name
+                        Visible: =!IsBlank(CMES_client2)
+                  - TextCanvas16_9:
+                      Control: Text@0.0.51
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =Parent.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        Text: =">"
+                        Visible: =!IsBlank(CMES_client3)
+                        Width: =10
+                  - ButtonCanvas21_9:
+                      Control: Button@0.0.45
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        BasePaletteColor: =ocColorFacturation
+                        FillPortions: =1
+                        FontSize: =11
+                        FontUnderline: =true
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        LayoutMinWidth: =40
+                        OnSelect: "=Set(varLoadingChoixIdSophiaSite,true);\r\nSet(tmp_CMES_client,CMES_client3);\r\nSet(CMES_client4,Blank());\r\n\r\nReset(TextInputCanvas9_4);\r\n\r\nSet(varLoadingChoixIdSophiaSite,true);\r\n\r\nSet(\r\n    GraphQLQuery,\r\n    \"query TableOrganizations($organizationId: ID!, $pagination: Pagination, $filters: OrganizationFilters, $sortFields: [String], $withStats: Boolean = false) {\\n  organization {\\n    getOrganizations(\\n      parentOrganizationId: $organizationId\\n      filters: $filters\\n      pagination: $pagination\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        locale\\n        type\\n        roles {\\n          id\\n          name\\n          __typename\\n        }\\n        contact {\\n          id\\n          firstName\\n          lastName\\n          __typename\\n        }\\n        internalOrganization\\n        siteCount\\n        identityCount\\n        address {\\n          city\\n          country\\n          street\\n          zipCode\\n          __typename\\n        }\\n        referents {\\n          firstName\\n          identityId\\n          lastName\\n          label\\n          __typename\\n        }\\n        services {\\n          id\\n          name\\n          __typename\\n        }\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    getStats(parentOrganizationId: $organizationId) @include(if: $withStats) {\\n      reseller\\n      customer\\n      internal\\n      total\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);\r\n\r\nSet(\r\n    GraphQLVariables,\r\n    \"{\"\"organizationId\"\":\"\"\" & tmp_CMES_client.id&\"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":3000}}\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\n\r\nClearCollect(\r\n    cl_Organizations,\r\n    ForAll(\r\n        Table(varJson.data.organization.getOrganizations.edges),\r\n        {\r\n                id: Text(ThisRecord.Value.id),\r\n                name: Text(ThisRecord.Value.name),\r\n                type: Text(ThisRecord.Value.type),\r\n                __typename: Text(ThisRecord.Value.__typename),\r\n                city: Text(ThisRecord.Value.address.city),\r\n                street: Text(ThisRecord.Value.address.street),\r\n                zipCode: Text(ThisRecord.Value.address.zipCode),\r\n                siteCount: Value(ThisRecord.Value.siteCount)\r\n        }\r\n            \r\n        )\r\n);\r\n\r\nSet(\r\n    GraphQLQuery,\r\n    \"query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\\n  site {\\n    getSites(\\n      organizationId: $organizationId\\n      internalRecursive: $internalRecursive\\n      pagination: $pagination\\n      filters: $filters\\n      sortFields: $sortFields\\n    ) {\\n      edges {\\n        id\\n        name\\n        address {\\n          street\\n          zipCode\\n          city\\n          country\\n          complement\\n          __typename\\n        }\\n        identityCount\\n        createdAt\\n        __typename\\n      }\\n      pageInfo {\\n        nextPage\\n        previousPage\\n        count\\n        nbPage\\n        page\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"\r\n);\r\nSet(\r\n    GraphQLVariables,\r\n    \"{\"\"organizationId\"\":\"\"\" & tmp_CMES_client.id & \"\"\",\"\"pagination\"\":{\"\"page\"\":1,\"\"limit\"\":3000},\"\"internalRecursive\"\":true}\"\r\n);\r\nSet(\r\n    GraphQLBody,\r\n    \"{\"\"query\"\": \"\"\" & GraphQLQuery & \"\"\" ,\r\n  \"\"variables\"\": \" & GraphQLVariables & \"\r\n}\"\r\n);\r\nSet(\r\n    GraphQLResult,\r\n    GraphQL.Run(GraphQLBody).reponse\r\n);\r\nSet(\r\n    varJson,\r\n    ParseJSON(GraphQLResult)\r\n);\r\n\r\nCollect(\r\n    cl_Organizations,\r\n    ForAll(\r\n        Table(varJson.data.site.getSites.edges),\r\n            {\r\n                id: Text(ThisRecord.Value.id),\r\n                name: Text(ThisRecord.Value.name),\r\n                __typename:  Text(ThisRecord.Value.__typename),\r\n                city: Text(ThisRecord.Value.address.city),\r\n                street: Text(ThisRecord.Value.address.street),\r\n                zipCode: Text(ThisRecord.Value.address.zipCode),\r\n                complement: Text(ThisRecord.Value.address.complement),\r\n                siteCount: 0\r\n\r\n            }\r\n        \r\n    )\r\n);\r\n\r\nSet(\r\n            CMES_OrganizationSite,\r\n            Blank()\r\n        );\r\n        Clear(cl_Site_CMES);\r\n\r\n\r\n\r\nSet(varLoadingChoixIdSophiaSite,false);"
+                        Text: =CMES_client3.name
+                        Visible: =!IsBlank(CMES_client3)
+                  - TextCanvas16_10:
+                      Control: Text@0.0.51
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =Parent.Height
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        Text: =">"
+                        Visible: =!IsBlank(CMES_client4)
+                        Width: =10
+                  - ButtonCanvas21_10:
+                      Control: Button@0.0.45
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Appearance: ='ButtonCanvas.Appearance'.Transparent
+                        BasePaletteColor: =ocColorFacturation
+                        FillPortions: =1
+                        FontSize: =11
+                        FontUnderline: =true
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =Parent.Height
+                        LayoutMinWidth: =40
+                        Text: =CMES_client4.name
+                        Visible: =!IsBlank(CMES_client4)
+            - Gallery13_4:
+                Control: Gallery@2.15.0
+                Variant: BrowseLayout_Flexible_SocialFeed_ver5.0
+                Properties:
+                  BorderColor: =ocColorFacturation
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Min(Self.TemplateHeight * Self.AllItemsCount /*+ CountRows(cl_Site_CMES)*Gallery5_4.TemplateHeight*/,325-Label42_8.Height-TextInputCanvas9_4.Height-Container12_2.Height)
+                  Items: |-
+                    =Search(
+                        SortByColumns(
+                            AddColumns(
+                                cl_Organizations,
+                                adresse,
+                                street & " " & zipCode & " " & city
+                            ),
+                            "type",
+                            SortOrder.Descending,
+                            "name",
+                            SortOrder.Ascending
+                        ),
+                        TextInputCanvas9_4.Value,
+                        name,
+                        adresse,
+                        type
+                    )
+                  TemplateFill: = If( Lower(ThisItem.__typename) = "site" || (Lower(ThisItem.type) = "customer" && ThisItem.siteCount = 1),RGBA(199, 199, 199, 0.25),RGBA(0, 0, 0, 0))
+                  TemplatePadding: =0
+                  TemplateSize: =69
+                  Visible: =!varLoadingChoixIdSophiaSite
+                  Width: =467
+                  Y: =Label42_8.Height+TextInputCanvas9_4.Height+Container12_2.Height
+                Children:
+                  - Rectangle15_17:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Fill: =ocColorFacturation
+                        Height: =Parent.TemplateHeight
+                        OnSelect: =Select(Parent)
+                        Visible: =If(Lower(ThisItem.__typename) = "site" || (Lower(ThisItem.type) = "customer" && ThisItem.siteCount = 1),true,false)
+                        Width: =6
+                  - Label40_36:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Height: =19
+                        OnSelect: |-
+                          =//Launch("https://sophia3.sewan.fr/p"&ThisItem.person_id&"/users")
+
+                          /*Launch("https://sophia3.sewan.fr/p"&ThisItem.Per_Id&"/users")*/
+
+                          If(Lower(ThisItem.__typename) = "site",Launch("https://sophia3.sewan.fr/go/admin/accounts/site/"&ThisItem.id), Launch("https://sophia3.sewan.fr/go/admin/sites/org/"&ThisItem.id))
+                        Size: =11
+                        Text: |-
+                          =/*ThisItem.person_id*/
+
+                          ThisItem.name
+                        Underline: =true
+                        Width: =380
+                        Wrap: =false
+                        X: =4
+                        Y: =3
+                  - Label40_37:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Font: =Font.'Open Sans'
+                        Height: =29
+                        OnSelect: =Select(Parent)
+                        Size: =10
+                        Text: =Switch(Lower(ThisItem.type), "customer","Client monosite","reseller", "Revendeur","multisite","Client multisite - "& ThisItem.siteCount& " sites","Site")
+                        Width: =250
+                        Wrap: =false
+                        X: =24
+                        Y: =18
+                  - ButtonCanvas15_5:
+                      Control: Button@0.0.45
+                      Properties:
+                        BasePaletteColor: =ocColorFacturation
+                        FontSize: =10
+                        Height: =22
+                        OnSelect: |
+                          =Set(
+                              varLoadingChoixIdSophiaSite,
+                              true
+                          );
+                          If(
+                              Lower(ThisItem.__typename) = "organization" && !(Lower(ThisItem.type) = "customer" && ThisItem.siteCount = 1),
+                              If(
+                                  IsBlank(CMES_client2),
+                                  Set(
+                                      CMES_client2,
+                                      ThisItem
+                                  );
+                                  Set(
+                                      tmp_CMES_client,
+                                      ThisItem
+                                  ),
+                                  If(
+                                      IsBlank(CMES_client3),
+                                      Set(
+                                          CMES_client3,
+                                          ThisItem
+                                      );
+                                      Set(
+                                          tmp_CMES_client,
+                                          ThisItem
+                                      ),
+                                      If(
+                                          IsBlank(CMES_client4),
+                                          Set(
+                                              CMES_client4,
+                                              ThisItem
+                                          );
+                                          Set(
+                                              tmp_CMES_client,
+                                              ThisItem
+                                          )
+                                      )
+                                  )
+                              );
+                              Reset(TextInputCanvas9_4);
+                              Set(
+                                  GraphQLQuery,
+                                  "query TableOrganizations($organizationId: ID!, $pagination: Pagination, $filters: OrganizationFilters, $sortFields: [String], $withStats: Boolean = false) {\n  organization {\n    getOrganizations(\n      parentOrganizationId: $organizationId\n      filters: $filters\n      pagination: $pagination\n      sortFields: $sortFields\n    ) {\n      edges {\n        id\n        name\n        locale\n        type\n        roles {\n          id\n          name\n          __typename\n        }\n        contact {\n          id\n          firstName\n          lastName\n          __typename\n        }\n        internalOrganization\n        siteCount\n        identityCount\n        address {\n          city\n          country\n          street\n          zipCode\n          __typename\n        }\n        referents {\n          firstName\n          identityId\n          lastName\n          label\n          __typename\n        }\n        services {\n          id\n          name\n          __typename\n        }\n        createdAt\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    getStats(parentOrganizationId: $organizationId) @include(if: $withStats) {\n      reseller\n      customer\n      internal\n      total\n      __typename\n    }\n    __typename\n  }\n}\n"
+                              );
+                              Set(
+                                  GraphQLVariables,
+                                  "{""organizationId"":""" & tmp_CMES_client.id & """,""pagination"":{""page"":1,""limit"":3000}}"
+                              );
+                              Set(
+                                  GraphQLBody,
+                                  "{""query"": """ & GraphQLQuery & """ ,
+                                  ""variables"": " & GraphQLVariables & "}"
+                              );
+                              Set(
+                                  GraphQLResult,
+                                  GraphQL.Run(GraphQLBody).reponse
+                              );
+                              Set(
+                                  varJson,
+                                  ParseJSON(GraphQLResult)
+                              );
+                              ClearCollect(
+                                  cl_Organizations,
+                                  ForAll(
+                                      Table(varJson.data.organization.getOrganizations.edges),
+                                      {
+                                          id: Text(ThisRecord.Value.id),
+                                          name: Text(ThisRecord.Value.name),
+                                          type: Text(ThisRecord.Value.type),
+                                          __typename: Text(ThisRecord.Value.__typename),
+                                          city: Text(ThisRecord.Value.address.city),
+                                          street: Text(ThisRecord.Value.address.street),
+                                          zipCode: Text(ThisRecord.Value.address.zipCode),
+                                          siteCount: Value(ThisRecord.Value.siteCount)
+                                      }
+                                  )
+                              );
+                              Set(
+                                  GraphQLQuery,
+                                  "query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\n  site {\n    getSites(\n      organizationId: $organizationId\n      internalRecursive: $internalRecursive\n      pagination: $pagination\n      filters: $filters\n      sortFields: $sortFields\n    ) {\n      edges {\n        id\n        name\n        address {\n          street\n          zipCode\n          city\n          country\n          complement\n          __typename\n        }\n        identityCount\n        createdAt\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                              );
+                              Set(
+                                  GraphQLVariables,
+                                  "{""organizationId"":""" & tmp_CMES_client.id & """,""pagination"":{""page"":1,""limit"":3000},""internalRecursive"":true}"
+                              );
+                              Set(
+                                  GraphQLBody,
+                                  "{""query"": """ & GraphQLQuery & """ ,
+                                  ""variables"": " & GraphQLVariables & "}"
+                              );
+                              Set(
+                                  GraphQLResult,
+                                  GraphQL.Run(GraphQLBody).reponse
+                              );
+                              Set(
+                                  varJson,
+                                  ParseJSON(GraphQLResult)
+                              );
+                              Collect(
+                                  cl_Organizations,
+                                  ForAll(
+                                      Table(varJson.data.site.getSites.edges),
+                                      {
+                                          id: Text(ThisRecord.Value.id),
+                                          name: Text(ThisRecord.Value.name),
+                                          __typename: Text(ThisRecord.Value.__typename),
+                                          city: Text(ThisRecord.Value.address.city),
+                                          street: Text(ThisRecord.Value.address.street),
+                                          zipCode: Text(ThisRecord.Value.address.zipCode),
+                                          complement: Text(ThisRecord.Value.address.complement),
+                                          siteCount: 0
+                                      }
+                                  )
+                              );
+                              Set(
+                                  CMES_OrganizationSite,
+                                  Blank()
+                              );
+                              Clear(cl_Site_CMES);
+                              If(
+                                  CMES_OrganizationSite.id = ThisItem.id,
+                                  Set(
+                                      CMES_OrganizationSite,
+                                      Blank()
+                                  );
+                                  Clear(cl_Site_CMES),
+                                  Set(
+                                      CMES_OrganizationSite,
+                                      ThisItem
+                                  );
+                                  Clear(cl_Site_CMES);
+                                  Set(
+                                      GraphQLQuery,
+                                      "query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\n  site {\n    getSites(\n      organizationId: $organizationId\n      internalRecursive: $internalRecursive\n      pagination: $pagination\n      filters: $filters\n      sortFields: $sortFields\n    ) {\n      edges {\n        id\n        name\n        address {\n          street\n          zipCode\n          city\n          country\n          complement\n          __typename\n        }\n        identityCount\n        createdAt\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                                  );
+                                  Set(
+                                      GraphQLVariables,
+                                      "{""organizationId"":""" & CMES_OrganizationSite.id & """,""pagination"":{""page"":1,""limit"":2000}}"
+                                  );
+                                  Set(
+                                      GraphQLBody,
+                                      "{""query"": """ & GraphQLQuery & """ ,
+                                      ""variables"": " & GraphQLVariables & "}"
+                                  );
+                                  Set(
+                                      GraphQLResult,
+                                      GraphQL.Run(GraphQLBody).reponse
+                                  );
+                                  Set(
+                                      varJson,
+                                      ParseJSON(GraphQLResult)
+                                  );
+                                  ClearCollect(
+                                      cl_Site_CMES,
+                                      ForAll(
+                                          Table(varJson.data.site.getSites.edges),
+                                          {
+                                              id: Text(ThisRecord.Value.id),
+                                              name: Text(ThisRecord.Value.name),
+                                              __typename: Text(ThisRecord.Value.__typename),
+                                              city: Text(ThisRecord.Value.address.city),
+                                              street: Text(ThisRecord.Value.address.street),
+                                              zipCode: Text(ThisRecord.Value.address.zipCode),
+                                              complement: Text(varJson.data.site.getSite.address.complement)
+                                          }
+                                      )
+                                  )
+                              ),
+                              If(
+                                  Lower(ThisItem.type) = "customer" && ThisItem.siteCount = 1,
+                                  Set(
+                                      CMES_OrganizationSite,
+                                      ThisItem
+                                  );
+                                  Clear(cl_Site_CMES);
+                                  Set(
+                                      GraphQLQuery,
+                                      "query TableSites($organizationId: ID!, $internalRecursive: Boolean = false, $pagination: Pagination, $filters: SiteFilters, $sortFields: [String]) {\n  site {\n    getSites(\n      organizationId: $organizationId\n      internalRecursive: $internalRecursive\n      pagination: $pagination\n      filters: $filters\n      sortFields: $sortFields\n    ) {\n      edges {\n        id\n        name\n        address {\n          street\n          zipCode\n          city\n          country\n          complement\n          __typename\n        }\n        identityCount\n        createdAt\n        __typename\n      }\n      pageInfo {\n        nextPage\n        previousPage\n        count\n        nbPage\n        page\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                                  );
+                                  Set(
+                                      GraphQLVariables,
+                                      "{""organizationId"":""" & CMES_OrganizationSite.id & """,""pagination"":{""page"":1,""limit"":2000}}"
+                                  );
+                                  Set(
+                                      GraphQLBody,
+                                      "{""query"": """ & GraphQLQuery & """ ,
+                                      ""variables"": " & GraphQLVariables & "}"
+                                  );
+                                  Set(
+                                      GraphQLResult,
+                                      GraphQL.Run(GraphQLBody).reponse
+                                  );
+                                  Set(
+                                      varJson,
+                                      ParseJSON(GraphQLResult)
+                                  );
+                                  ClearCollect(
+                                      cl_Site_CMES,
+                                      ForAll(
+                                          Table(varJson.data.site.getSites.edges),
+                                          {
+                                              id: Text(ThisRecord.Value.id),
+                                              name: Text(ThisRecord.Value.name),
+                                              __typename: Text(ThisRecord.Value.__typename),
+                                              city: Text(ThisRecord.Value.address.city),
+                                              street: Text(ThisRecord.Value.address.street),
+                                              zipCode: Text(ThisRecord.Value.address.zipCode),
+                                              complement: Text(varJson.data.site.getSite.address.complement)
+                                          }
+                                      )
+                                  );
+                                  Set(
+                                      CMES_SiteClientMonosite,
+                                      First(cl_Site_CMES)
+                                  );
+                                  Set(
+                                      GraphQLQuery,
+                                      "query useSiteQuery($id: ID!) {\n  site {\n    getSite(id: $id) {\n      id\n      name\n      livePerId\n      locale\n      address {\n        country\n        __typename\n      }\n      organization {\n        id\n        name\n        type\n        livePerId\n        locale\n        parentOrganizationId\n        address {\n          street\n          zipCode\n          city\n          country\n          complement\n          __typename\n        }\n        parentHierarchy {\n          id\n          name\n          type\n          __typename\n        }\n        roles {\n          id\n          name\n          permissions {\n            id\n            resource\n            verb\n            scope\n            __typename\n          }\n          __typename\n        }\n        services {\n          id\n          name\n          __typename\n        }\n        timezone\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                                  );
+                                  Set(
+                                      GraphQLVariables,
+                                      "{""id"":""" & CMES_SiteClientMonosite.id & """}"
+                                  );
+                                  Set(
+                                      GraphQLBody,
+                                      "{""query"": """ & GraphQLQuery & """ ,
+                            ""variables"": " & GraphQLVariables & "
+                          }"
+                                  );
+                                  Set(
+                                      GraphQLResult,
+                                      GraphQL.Run(GraphQLBody).reponse
+                                  );
+                                  Set(
+                                      varJson,
+                                      ParseJSON(GraphQLResult)
+                                  );
+                                  Set(
+                                      GraphQLQuery,
+                                      "query useOrganizationQuery($id: ID!) {\n  organization {\n    getOrganization(id: $id) {\n      id\n      name\n      type\n      address {\n        country\n        __typename\n      }\n      roles {\n        id\n        name\n        permissions {\n          id\n          resource\n          verb\n          scope\n          __typename\n        }\n        __typename\n      }\n      parentHierarchy {\n        id\n        name\n        type\n        __typename\n      }\n      livePerId\n      parentOrganizationId\n      services {\n        id\n        name\n        __typename\n      }\n      timezone\n      locale\n      __typename\n    }\n    __typename\n  }\n}\n"
+                                  );
+                                  Set(
+                                      GraphQLVariables,
+                                      "{""id"":""" & ThisItem.id & """}"
+                                  );
+                                  Set(
+                                      GraphQLBody,
+                                      "{""query"": """ & GraphQLQuery & """ ,
+                            ""variables"": " & GraphQLVariables & "
+                          }"
+                                  );
+                                  Set(
+                                      GraphQLResult,
+                                      GraphQL.Run(GraphQLBody).reponse
+                                  );
+                                  Set(
+                                      varJson2,
+                                      ParseJSON(GraphQLResult)
+                                  );
+                                  Set(
+                                      GO_Site_CMES,
+                                      {
+                                          id: ThisItem.id,
+                                          name: ThisItem.name,
+                                          __typename: Text(varJson.data.site.getSite.__typename),
+                                          city: Text(varJson.data.site.getSite.address.city),
+                                          street: Text(varJson.data.site.getSite.address.street),
+                                          zipCode: Text(varJson.data.site.getSite.address.zipCode),
+                                          complement: Text(varJson.data.site.getSite.address.complement),
+                                          livePerId: Text(varJson2.data.organization.getOrganization.livePerId),
+                                          parentID: Text(varJson2.data.organization.getOrganization.parentOrganizationId)
+                                      }
+                                  ),
+                                  Set(
+                                      GraphQLQuery,
+                                      "query useSiteQuery($id: ID!) {\n  site {\n    getSite(id: $id) {\n      id\n      name\n      livePerId\n      locale\n      address {\n        country\n        __typename\n      }\n      organization {\n        id\n        name\n        type\n        livePerId\n        locale\n        parentOrganizationId\n        address {\n          street\n          zipCode\n          city\n          country\n          complement\n          __typename\n        }\n        parentHierarchy {\n          id\n          name\n          type\n          __typename\n        }\n        roles {\n          id\n          name\n          permissions {\n            id\n            resource\n            verb\n            scope\n            __typename\n          }\n          __typename\n        }\n        services {\n          id\n          name\n          __typename\n        }\n        timezone\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"
+                                  );
+                                  Set(
+                                      GraphQLVariables,
+                                      "{""id"":""" & ThisItem.id & """}"
+                                  );
+                                  Set(
+                                      GraphQLBody,
+                                      "{""query"": """ & GraphQLQuery & """ ,
+                            ""variables"": " & GraphQLVariables & "
+                          }"
+                                  );
+                                  Set(
+                                      GraphQLResult,
+                                      GraphQL.Run(GraphQLBody).reponse
+                                  );
+                                  Set(
+                                      varJson,
+                                      ParseJSON(GraphQLResult)
+                                  );
+                                  Set(
+                                      GO_Site_CMES,
+                                      {
+                                          id: Text(varJson.data.site.getSite.id),
+                                          name: Text(varJson.data.site.getSite.name),
+                                          __typename: Text(varJson.data.site.getSite.__typename),
+                                          city: ThisItem.city,
+                                          street: ThisItem.street,
+                                          zipCode: ThisItem.zipCode,
+                                          complement: ThisItem.complement,
+                                          livePerId: Text(varJson.data.site.getSite.livePerId),
+                                          parentID: Text(varJson.data.site.getSite.organization.id)
+                                      }
+                                  )
+                              );
+                              Patch(
+                                  'oc_db.site',
+                                  {
+                                      id_site: gal_Facture.Selected.site,
+                                      per_id: GO_Site_CMES.livePerId,
+                                      site_nom_sophia: GO_Site_CMES.name,
+                                      id_sophia_go: GO_Site_CMES.id,
+                                      id_parent_sophia_go: GO_Site_CMES.parentID,
+                                      adresse_code_postal: If(
+                                          gal_Facture.Selected.site_adresse_code_postal in [
+                                              Blank(),
+                                              ""
+                                          ],
+                                          GO_Site_CMES.zipCode,
+                                          gal_Facture.Selected.site_adresse_code_postal
+                                      ),
+                                      adresse_complement: If(
+                                          gal_Facture.Selected.site_adresse_complement in [
+                                              Blank(),
+                                              ""
+                                          ],
+                                          GO_Site_CMES.complement,
+                                          gal_Facture.Selected.site_adresse_complement
+                                      ),
+                                      adresse_voie: If(
+                                          gal_Facture.Selected.site_adresse_voie in [
+                                              Blank(),
+                                              ""
+                                          ],
+                                          GO_Site_CMES.street,
+                                          gal_Facture.Selected.site_adresse_voie
+                                      ),
+                                      adresse_ville: If(
+                                          gal_Facture.Selected.site_adresse_ville in [
+                                              Blank(),
+                                              ""
+                                          ],
+                                          GO_Site_CMES.city,
+                                          gal_Facture.Selected.site_adresse_ville
+                                      ),
+                                      adresse_insee: If(
+                                          gal_Facture.Selected.site_adresse_insee in [
+                                              Blank(),
+                                              ""
+                                          ],
+                                          Trim(GO_Site_CMES.street & " " & GO_Site_CMES.complement & " " & GO_Site_CMES.zipCode & " " & GO_Site_CMES.city),
+                                          gal_Facture.Selected.site_adresse_insee
+                                      ),
+                                      modifie_le: UTCNow(Now()),
+                                      modifie_par: User().FullName
+                                  }
+                              );
+                              If(
+                                  gal_Facture.Selected.adresse_site in [
+                                      Blank(),
+                                      ""
+                                  ] || gal_Facture.Selected.id_site_sophia_go <> GO_Site_CMES.id,
+                                  ClearCollect(
+                                      cl_Ressources_NvSite,
+                                      AddColumns(
+                                          ShowColumns(
+                                              Filter(
+                                                  'oc_db.ressource_dpl',
+                                                  site = gal_Facture.Selected.site
+                                              ),
+                                              id_dpl
+                                          ),
+                                          id_site_sophia_go,
+                                          GO_Site_CMES.id,
+                                          adresse_site,
+                                          gal_Facture.Selected.site_adresse_insee
+                                      )
+                                  );
+                                  Patch(
+                                      'oc_db.ressource_dpl',
+                                      cl_Ressources_NvSite
+                                  );
+                                  Patch(
+                                      clFacture,
+                                      LookUp(
+                                          clFacture,
+                                          id_dpl = gal_Facture.Selected.id_dpl
+                                      ),
+                                      {id_site_sophia_go: Text(ThisItem.id)}
+                                  )
+                              );
+                              Set(
+                                  varVisibleChoixIdSophiaSite,
+                                  false
+                              )
+                          );
+                          Set(
+                              varLoadingChoixIdSophiaSite,
+                              false
+                          );
+                        Text: |-
+                          =//If(Lower(ThisItem.__typename) ="organization" && !(Lower(ThisItem.type) = "customer" && ThisItem.siteCount = 1);"Voir le(s) site(s)";"Synchroniser")
+
+                          Switch(Lower(ThisItem.type), "customer","Synchroniser","reseller", "Voir le(s) client(s)","multisite","Voir le(s) site(s)","Synchroniser")
+                        Width: =110
+                        X: =340
+                        Y: =24
+                  - Image4_4:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Height: =16
+                        Image: "=\"data:image/svg+xml;utf8, \" & EncodeUrl(\n    Switch(\n        Lower(ThisItem.type),\n        \"reseller\",\n        \"<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M10 6.75V14.75H2V0.75H11V6.75H10Z' fill='#B7EFD4'></path><path d='M14.75 14V6H9.25V14H2.75V1.5H11.25V3.75H12.75V0.75C12.75 0.34 12.41 0 12 0H2C1.59 0 1.25 0.34 1.25 0.75V14H0V15.5H16V14H14.75ZM10.75 7.5H13.25V14H10.75V7.5Z' fill='#17AF66' fill-rule='evenodd' clip-rule='evenodd'></path><path d='M7 3.75H5V5.75H7V3.75Z' fill='#17AF66' fill-rule='evenodd' clip-rule='evenodd'></path><path d='M7 6.75H5V8.75H7V6.75Z' fill='#17AF66' fill-rule='evenodd' clip-rule='evenodd'></path><path d='M7 9.75H5V11.75H7V9.75Z' fill='#17AF66' fill-rule='evenodd' clip-rule='evenodd'></path></svg>\",\n        \"multisite\",\n        \"<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M14 8.75H2V14.75H14V8.75Z' fill='#ACDEFB'></path><path d='M14.75 14V8.99C15.35 8.53 15.75 7.82 15.75 7C15.75 6.07 15.53 5.13 15.11 4.3L13.67 1.42C13.54 1.16 13.28 1 13 1H3C2.72 1 2.46 1.16 2.33 1.41L0.89 4.3C0.47 5.13 0.25 6.07 0.25 7C0.25 7.81 0.65 8.53 1.25 8.99V14H0V15.5H16V14H14.75ZM2.23 4.97L3.46 2.5H12.53L13.76 4.97C14.08 5.6 14.25 6.3 14.25 7C14.25 7.55 13.8 8 13.25 8C12.7 8 12.25 7.55 12.25 7V5.75H10.75V7C10.75 7.55 10.3 8 9.75 8C9.2 8 8.75 7.55 8.75 7V5.75H7.25V7C7.25 7.55 6.8 8 6.25 8C5.7 8 5.25 7.55 5.25 7V5.75H3.75V7C3.75 7.55 3.3 8 2.75 8C2.2 8 1.75 7.55 1.75 7C1.75 6.3 1.92 5.6 2.23 4.97ZM2.75 9.5C3.43 9.5 4.05 9.22 4.5 8.78C4.95 9.22 5.57 9.5 6.25 9.5C6.93 9.5 7.55 9.22 8 8.78C8.45 9.22 9.07 9.5 9.75 9.5C10.43 9.5 11.05 9.22 11.5 8.78C11.95 9.22 12.57 9.5 13.25 9.5V14H10.66V11.25H8.66V14H2.75V9.5Z' fill='#2794D4' fill-rule='evenodd' clip-rule='evenodd'></path></svg>\",\n        \"<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M14 8.75L7 7.75L4.25 10.75V14.75H14V8.75Z' fill='#FFD0B6'></path><path d='M14.75 14V8.99C15.35 8.53 15.75 7.82 15.75 7C15.75 6.07 15.53 5.13 15.11 4.3L13.67 1.42C13.54 1.16 13.28 1 13 1H3C2.72 1 2.46 1.16 2.33 1.41L1.65 2.76L3 3.43L3.46 2.5H12.53L13.76 4.97C14.08 5.6 14.25 6.3 14.25 7C14.25 7.55 13.8 8 13.25 8C12.7 8 12.25 7.55 12.25 7V5.75H10.75V7C10.75 7.55 10.3 8 9.75 8C9.2 8 8.75 7.55 8.75 7V5.75H7.44C6.78 4.71 5.6 4.01 4.25 4.01C2.18 4.01 0.5 5.64 0.5 7.65C0.5 10.34 4.13 13.9 4.24 14H0V15.5H16V14H14.75ZM3 7.76C3 7.07 3.56 6.51 4.25 6.51C4.94 6.51 5.5 7.07 5.5 7.76C5.5 8.45 4.94 9.01 4.25 9.01C3.56 9.01 3 8.45 3 7.76ZM8.66 11.25V14H4.26C4.36 13.9 7.19 11.12 7.86 8.62C8.32 9.15 8.99 9.5 9.75 9.5C10.43 9.5 11.05 9.22 11.5 8.78C11.95 9.22 12.57 9.5 13.25 9.5V14H10.66V11.25H8.66Z' fill='#E66A25' fill-rule='evenodd' clip-rule='evenodd'></path></svg>\"\n        \n    )\n)"
+                        OnSelect: =Select(Parent)
+                        Width: =16
+                        X: =8
+                        Y: =25
+                  - Label40_38:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Font: =Font.'Open Sans'
+                        Height: =29
+                        Italic: =true
+                        OnSelect: =Select(Parent)
+                        Size: =9
+                        Text: |-
+                          =//LookUp('agoralive.Addresses';Add_Id = ThisItem.SearchData.Per_Address).Add_Address1
+                          ThisItem.street & " " & ThisItem.zipCode & " " & ThisItem.city
+                        Width: =411
+                        Wrap: =false
+                        X: =4
+                        Y: =38
+                  - Rectangle15_12:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Fill: =ocColorFacturation
+                        Height: =1
+                        OnSelect: =Select(Parent)
+                        Width: =463
+                        Y: =68
+            - Spinner4_4:
+                Control: Spinner@1.4.6
+                Properties:
+                  Appearance: ='Spinner.Appearance'.Primary
+                  Height: =69
+                  SpinnerColor: =ocColorFacturation
+                  TrackColor: =ColorFade(ocColorFacturation,80%)
+                  Visible: =!Gallery13_4.Visible
+                  Width: =467
+                  Y: =Label42_8.Height+TextInputCanvas9_4.Height+Container12_2.Height
+      - Icon19_14:
+          Control: Classic/Icon@2.5.0
+          Properties:
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Color: =RGBA(0, 0, 0, 1)
+            Height: =18
+            Icon: =Icon.Database
+            OnSelect: |
+              =Set(
+                  varVisibleChoixContrat,
+                  true
+              );
+            Tooltip: ="Choisir un site existant sur Sophia pour ce client"
+            Width: =18
+            X: =1121
+            Y: =472
+      - drp_Vue_Contrat_CMES:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            AllowEmptySelection: =true
+            BorderColor: =ocColorFacturation
+            ChevronBackground: =ocColorFacturation
+            ChevronFill: =RGBA(255, 255, 255, 1)
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =RGBA(255, 255, 255, 1)
+            Default: ="A Facturer"
+            FocusedBorderThickness: =2
+            Font: =Font.'Open Sans'
+            Height: =25
+            HoverFill: =Self.SelectionFill
+            Items: =cl_Vue_Contrat_CMES
+            Items.Value: =Categorie
+            OnChange: =
+            PressedColor: =RGBA(0, 0, 0, 1)
+            PressedFill: =RGBA(255, 255, 255, 1)
+            SelectionColor: =RGBA(0, 0, 0, 1)
+            SelectionFill: =RGBA(104, 151, 111, 0.19)
+            Size: =10
+            Width: =250
+            X: =674
+            Y: =28
+      - ctn_CMES_NavBack_6:
+          Control: GroupContainer@1.4.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =ocColorFacturation
+            BorderThickness: =2
+            DropShadow: =DropShadow.Regular
+            Fill: =ocColorFacturation
+            Height: =48
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =58
+            X: =1200
+            Y: =18
+          Children:
+            - ico_CMES_NavBack_7:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =ocColorFacturation
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Parent.Height
+                  Icon: =Icon.ArrowLeft
+                  OnSelect: =Navigate('Validation BDC')
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Width: =Parent.Width
+            - ico_CMES_NavBack_8:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =ocColorFacturation
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =Parent.Height
+                  Icon: =Icon.Reload
+                  OnSelect: =RefreshFacturation()
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Width: =Parent.Width
