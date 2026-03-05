@@ -46,6 +46,12 @@ const navItems = [
   { href: '/a-facturer', label: 'A Facturer', icon: '2' },
 ];
 
+const BottomSection = styled.div`
+  margin-top: auto;
+  border-top: 1px solid #E5E7EB;
+  padding-top: 8px;
+`;
+
 export function Sidebar() {
   const pathname = usePathname();
 
@@ -57,6 +63,11 @@ export function Sidebar() {
           {item.label}
         </NavItem>
       ))}
+      <BottomSection>
+        <NavItem href="/aide" $active={pathname === '/aide'}>
+          Aide
+        </NavItem>
+      </BottomSection>
     </SidebarWrapper>
   );
 }

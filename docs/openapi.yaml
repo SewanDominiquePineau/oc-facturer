@@ -1,0 +1,1298 @@
+openapi: 3.0.3
+info:
+  title: OC-Facturer API
+  description: API de gestion de la facturation des bons de commande Sewan (OC-DB + Sophia GraphQL)
+  version: 0.1.0
+  contact:
+    name: Dominique Pineau
+    email: dominique.pineau@sewan.fr
+
+servers:
+  - url: http://localhost:3000
+    description: Developpement local
+  - url: https://oc-facturer.sewan.fr
+    description: Production
+
+tags:
+  - name: Auth
+    description: Authentification et gestion des utilisateurs
+  - name: BDC
+    description: Bons de commande
+  - name: Facturation
+    description: Ressources a facturer (CMES / Facturations Anticipees)
+  - name: Resources
+    description: Ressources DPL (lignes de deploiement)
+  - name: Clients
+    description: Clients (correspondance Dynamics / Sophia)
+  - name: Sophia
+    description: Proxy vers l'API Sophia GraphQL
+  - name: Health
+    description: Health check
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token (1h). Obtenu via POST /api/auth/login.
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Erreur serveur
+
+    PaginatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        count:
+          type: integer
+          description: Nombre total d'elements
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@sewan.fr
+        password:
+          type: string
+          format: password
+          example: Admin123!
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        token:
+          type: string
+          description: JWT access token (expire 1h)
+        refreshToken:
+          type: string
+          description: JWT refresh token (expire 7j)
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            nom:
+              type: string
+            email:
+              type: string
+            accesAdv:
+              type: boolean
+            accesAdmin:
+              type: boolean
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+        nom:
+          type: string
+        accesAdv:
+          type: boolean
+        accesAdmin:
+          type: boolean
+
+    Utilisateur:
+      type: object
+      properties:
+        id_utilisateur:
+          type: string
+          format: uuid
+        nom_utilisateur:
+          type: string
+        email_utilisateur:
+          type: string
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        acces_commerce:
+          type: integer
+        acces_adv:
+          type: integer
+        acces_planif:
+          type: integer
+        acces_admin:
+          type: integer
+        acces_cdp:
+          type: integer
+        acces_attribution:
+          type: integer
+        acces_deploiement:
+          type: integer
+        acces_rgpd:
+          type: integer
+        actif:
+          type: integer
+
+    CreateUserRequest:
+      type: object
+      required: [nom, email, password]
+      properties:
+        nom:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          description: "Min 8 chars, 1 majuscule, 1 minuscule, 1 chiffre"
+        accesAdv:
+          type: boolean
+        accesAdmin:
+          type: boolean
+
+    BonDeCommande:
+      type: object
+      properties:
+        id_bon_de_commande:
+          type: string
+          format: uuid
+        numero_bdc:
+          type: string
+        per_name:
+          type: string
+          description: Nom du client
+        dynamics_account_id:
+          type: string
+          nullable: true
+        statut_bdc:
+          type: integer
+        cree_le:
+          type: string
+          format: date-time
+        commercial_nom:
+          type: string
+          nullable: true
+        type_de_vente:
+          type: string
+          nullable: true
+        ajout_gdc:
+          type: integer
+          description: "Flag ajout GDC (0/1)"
+        gdc_contractId:
+          type: string
+          format: uuid
+          nullable: true
+        gdc_contractName:
+          type: string
+          nullable: true
+        gdc_invoicedEntityId:
+          type: string
+          format: uuid
+          nullable: true
+        gdc_invoicedEntityName:
+          type: string
+          nullable: true
+
+    BdcUpdateRequest:
+      type: object
+      description: "Champs autorises (whitelist): gdc_contractId, gdc_contractName, gdc_invoicedEntityId, gdc_invoicedEntityName, id_sophia_go_facturation, nom_sophia_facturation, ajout_gdc"
+      properties:
+        gdc_contractId:
+          type: string
+          format: uuid
+        gdc_contractName:
+          type: string
+        gdc_invoicedEntityId:
+          type: string
+          format: uuid
+        gdc_invoicedEntityName:
+          type: string
+        ajout_gdc:
+          type: integer
+
+    RessourceDpl:
+      type: object
+      properties:
+        id_dpl:
+          type: string
+          format: uuid
+        id_commande:
+          type: string
+          format: uuid
+        code_produit:
+          type: string
+          nullable: true
+        nom:
+          type: string
+          nullable: true
+        quantite:
+          type: integer
+        nom_site:
+          type: string
+          nullable: true
+        id_site_sophia_go:
+          type: string
+          format: uuid
+          nullable: true
+        gdc_contractId:
+          type: string
+          nullable: true
+        gdc_serviceId:
+          type: string
+          nullable: true
+        gdc_categoryId:
+          type: string
+          nullable: true
+        gdc_catalogRef:
+          type: string
+          nullable: true
+        gdc_productName:
+          type: string
+          nullable: true
+        gdc_itemStatus:
+          type: string
+          nullable: true
+          enum: [null, INPROGRESS, ACTIVATED]
+        gdc_hidden:
+          type: integer
+        J2_date_CMES:
+          type: string
+          format: date
+          nullable: true
+        date_factu_anticipee:
+          type: string
+          format: date
+          nullable: true
+
+    ResourceUpdateRequest:
+      type: object
+      description: "Champs autorises: gdc_catalogRef, gdc_categoryId, gdc_serviceId, gdc_productName, gdc_productName_update, gdc_contractId, gdc_id_product, gdc_itemStatus, gdc_hidden, id_site_sophia_go, gdc_concernedSiteId, code_produit"
+
+    FacturationStats:
+      type: object
+      properties:
+        stats:
+          type: object
+          properties:
+            cmes_total:
+              type: integer
+            cmes_a_facturer:
+              type: integer
+            cmes_activated:
+              type: integer
+            cmes_inprogress:
+              type: integer
+            cmes_hidden:
+              type: integer
+            cmes_abo_restant:
+              type: number
+            cmes_fas_restant:
+              type: number
+            fac_total:
+              type: integer
+            fac_a_facturer:
+              type: integer
+            fac_activated:
+              type: integer
+        topClients:
+          type: array
+          items:
+            type: object
+            properties:
+              per_name:
+                type: string
+              nb:
+                type: integer
+        monthlyProgress:
+          type: array
+          items:
+            type: object
+            properties:
+              mois:
+                type: string
+              total:
+                type: integer
+              fait:
+                type: integer
+
+    Client:
+      type: object
+      properties:
+        id_client_dynamics:
+          type: string
+        id_sophia_go:
+          type: string
+          nullable: true
+        nom_dynamics:
+          type: string
+          nullable: true
+        nom_sophia:
+          type: string
+          nullable: true
+
+    SophiaArticleInput:
+      type: object
+      required: [contractId, catalogRef]
+      properties:
+        contractId:
+          type: string
+          format: uuid
+        catalogRef:
+          type: string
+        concernedSiteId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        amount:
+          type: number
+        SAF:
+          type: number
+        qty:
+          type: integer
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        productId:
+          type: string
+        billingMode:
+          type: string
+        commitment:
+          type: string
+
+    SophiaContract:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        contractNumber:
+          type: string
+        status:
+          type: string
+        lastUpdate:
+          type: string
+        client:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            internalReference:
+              type: string
+
+    SophiaSite:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+            zipCode:
+              type: string
+            city:
+              type: string
+            country:
+              type: string
+
+    SophiaOrganization:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+
+    SophiaProduct:
+      type: object
+      properties:
+        serviceId:
+          type: string
+        serviceName:
+          type: string
+        productName:
+          type: string
+        categoryId:
+          type: string
+        subCategoryName:
+          type: string
+        catalogRef:
+          type: string
+        unit:
+          type: string
+        price:
+          type: number
+
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded]
+        checks:
+          type: object
+          properties:
+            database:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ok, error]
+            sophia:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ok, error]
+
+security:
+  - BearerAuth: []
+
+paths:
+  # ==================== AUTH ====================
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Connexion utilisateur
+      description: Authentification par email/password. Rate-limited (5 tentatives / 15 min par email).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Connexion reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Email et mot de passe requis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Identifiants incorrects
+        '429':
+          description: Trop de tentatives
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Secondes avant prochain essai
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renouvellement du token
+      description: Echange un refresh token valide contre un nouveau couple access + refresh.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Tokens renouveles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Refresh token invalide ou expire
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Profil utilisateur connecte
+      responses:
+        '200':
+          description: Profil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Non authentifie
+
+  /api/auth/users:
+    get:
+      tags: [Auth]
+      summary: Liste des utilisateurs
+      description: Requiert le role admin.
+      responses:
+        '200':
+          description: Liste des utilisateurs (sans mot de passe)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Utilisateur'
+        '403':
+          description: Acces reserve aux administrateurs
+    post:
+      tags: [Auth]
+      summary: Creer un utilisateur
+      description: Requiert le role admin. Mot de passe min 8 chars, 1 majuscule, 1 minuscule, 1 chiffre.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Utilisateur cree
+        '400':
+          description: Donnees invalides
+        '403':
+          description: Acces reserve aux administrateurs
+        '409':
+          description: Email deja utilise
+
+  /api/auth/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Auth]
+      summary: Modifier un utilisateur
+      description: "Requiert le role admin. Champs modifiables: actif, accesAdv, accesAdmin, password."
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actif:
+                  type: boolean
+                accesAdv:
+                  type: boolean
+                accesAdmin:
+                  type: boolean
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Utilisateur mis a jour
+        '403':
+          description: Acces reserve aux administrateurs
+        '404':
+          description: Utilisateur non trouve
+    delete:
+      tags: [Auth]
+      summary: Supprimer un utilisateur
+      description: Requiert le role admin.
+      responses:
+        '200':
+          description: Utilisateur supprime
+        '403':
+          description: Acces reserve aux administrateurs
+
+  # ==================== BDC ====================
+  /api/bdc:
+    get:
+      tags: [BDC]
+      summary: Liste des bons de commande
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum: [all, sans_contrat, plus_1mois, enregistre]
+            default: all
+          description: "all=tous, sans_contrat=sans contrat Sophia, plus_1mois=crees depuis >1 mois, enregistre=avec contrat"
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Recherche sur numero_bdc, per_name, commercial_nom
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        '200':
+          description: Liste paginee
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BonDeCommande'
+
+  /api/bdc/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [BDC]
+      summary: Detail d'un BDC
+      responses:
+        '200':
+          description: BDC trouve
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/BonDeCommande'
+        '404':
+          description: BDC non trouve
+    patch:
+      tags: [BDC]
+      summary: Mettre a jour un BDC
+      description: Champs autorises (whitelist) uniquement. Requiert auth.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BdcUpdateRequest'
+      responses:
+        '200':
+          description: BDC mis a jour
+
+  /api/bdc/{id}/resources:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [BDC]
+      summary: Ressources d'un BDC
+      responses:
+        '200':
+          description: Liste des ressources DPL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RessourceDpl'
+                  count:
+                    type: integer
+
+  /api/bdc/{id}/ajout-gdc:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [BDC]
+      summary: Toggle ajout GDC
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ajout_gdc:
+                  type: boolean
+      responses:
+        '200':
+          description: Flag mis a jour
+
+  # ==================== FACTURATION ====================
+  /api/bdc/facturation:
+    get:
+      tags: [Facturation]
+      summary: Ressources a facturer
+      description: Liste paginee avec onglets CMES / Facturations Anticipees. Jointures sur BDC, site, client, duree.
+      parameters:
+        - name: tab
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [cmes, fac_anticipees]
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum: [tous, a_facturer, masquees, dans_gdc]
+            default: tous
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+        - name: sortKey
+          in: query
+          schema:
+            type: string
+            enum: [numero_bdc, per_name, code_produit, duree_mois, gdc_productName, quantite, abo, fas, J2_date_CMES, date_factu_anticipee, nom_site, gdc_itemStatus]
+        - name: sortDir
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: Liste paginee
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RessourceDpl'
+
+  /api/bdc/facturation/stats:
+    get:
+      tags: [Facturation]
+      summary: Statistiques de facturation
+      description: Totaux CMES/Fac, top 10 clients, progression mensuelle (12 mois).
+      responses:
+        '200':
+          description: Statistiques
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/FacturationStats'
+
+  /api/bdc/facturation/cancelled:
+    get:
+      tags: [Facturation]
+      summary: BDC annules
+      description: Retourne la liste des IDs de BDC annules (vue_bdc_annules).
+      responses:
+        '200':
+          description: Liste des IDs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: string
+
+  # ==================== RESOURCES ====================
+  /api/resources/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Resources]
+      summary: Mettre a jour une ressource
+      description: "Champs autorises: gdc_catalogRef, gdc_categoryId, gdc_serviceId, gdc_productName, gdc_productName_update, gdc_contractId, gdc_id_product, gdc_itemStatus, gdc_hidden, id_site_sophia_go, gdc_concernedSiteId, code_produit"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceUpdateRequest'
+      responses:
+        '200':
+          description: Ressource mise a jour
+
+  /api/resources/{id}/hide:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Resources]
+      summary: Masquer/afficher une ressource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [hidden]
+              properties:
+                hidden:
+                  type: boolean
+      responses:
+        '200':
+          description: Visibilite mise a jour
+
+  # ==================== CLIENTS ====================
+  /api/clients/{dynamicsAccountId}:
+    parameters:
+      - name: dynamicsAccountId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Clients]
+      summary: Info client par ID Dynamics
+      responses:
+        '200':
+          description: Client trouve
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Client'
+        '404':
+          description: Client non trouve
+
+  # ==================== SOPHIA ====================
+  /api/sophia/contracts:
+    get:
+      tags: [Sophia]
+      summary: Recherche de contrats Sophia
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Contrats trouves
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SophiaContract'
+
+  /api/sophia/organizations:
+    get:
+      tags: [Sophia]
+      summary: Organisation Sophia
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: ID organisation (defaut = env SOPHIA_ORGANIZATION_ID)
+      responses:
+        '200':
+          description: Organisation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/SophiaOrganization'
+
+  /api/sophia/organizations/{id}/children:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Sophia]
+      summary: Organisations enfants
+      responses:
+        '200':
+          description: Liste des organisations enfants
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SophiaOrganization'
+
+  /api/sophia/sites:
+    get:
+      tags: [Sophia]
+      summary: Recherche de sites Sophia
+      parameters:
+        - name: organizationId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            maximum: 100
+      responses:
+        '200':
+          description: Sites trouves
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SophiaSite'
+
+  /api/sophia/sites/select:
+    post:
+      tags: [Sophia]
+      summary: Selectionner un site pour une ressource
+      description: Verifie la hierarchie du site dans le contrat, met a jour la ressource avec le site Sophia.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [siteId, resourceId, contractId]
+              properties:
+                siteId:
+                  type: string
+                  format: uuid
+                resourceId:
+                  type: string
+                  format: uuid
+                contractId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Site associe a la ressource
+
+  /api/sophia/sites/verify:
+    post:
+      tags: [Sophia]
+      summary: Verifier un site dans un contrat
+      parameters:
+        - name: siteId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contractId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Verification effectuee
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  verified:
+                    type: boolean
+
+  /api/sophia/articles:
+    post:
+      tags: [Sophia]
+      summary: Ajouter un article dans un contrat Sophia
+      description: "Champs autorises: contractId, catalogRef, concernedSiteId, description, amount, SAF, qty, startDate, endDate, productId, billingMode, commitment. SAF et amount sont supprimes si 0 (sauf catalogRef terminant par -M ou -Z)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [article]
+              properties:
+                article:
+                  $ref: '#/components/schemas/SophiaArticleInput'
+      responses:
+        '200':
+          description: Article cree
+        '400':
+          description: Donnees invalides
+    delete:
+      tags: [Sophia]
+      summary: Supprimer des articles Sophia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  minItems: 1
+      responses:
+        '200':
+          description: Articles supprimes
+
+  /api/sophia/articles/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Sophia]
+      summary: Detail d'un article
+      responses:
+        '200':
+          description: Article
+    patch:
+      tags: [Sophia]
+      summary: Mettre a jour un article
+      description: "Champs autorises: amount, SAF, qty, startDate, endDate, description, concernedSiteId, billingMode, commitment, status"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [article]
+              properties:
+                article:
+                  type: object
+      responses:
+        '200':
+          description: Article mis a jour
+
+  /api/sophia/articles/orphans:
+    get:
+      tags: [Sophia]
+      summary: Articles orphelins
+      description: Articles presents dans Sophia mais sans correspondance dans la base locale.
+      parameters:
+        - name: contractId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: siteId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Articles orphelins
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  orphans:
+                    type: array
+                    items:
+                      type: object
+                  totalGo:
+                    type: integer
+                  totalOrphans:
+                    type: integer
+
+  /api/sophia/products/search/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 2
+        description: Code produit (min 2 caracteres). Transforme automatiquement (logique F/M).
+    get:
+      tags: [Sophia]
+      summary: Recherche produit par code
+      responses:
+        '200':
+          description: Produits trouves
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SophiaProduct'
+                  originalCode:
+                    type: string
+                  transformedCode:
+                    type: string
+
+  # ==================== HEALTH ====================
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Verifie la connexion DB et l'API Sophia. Pas d'authentification requise.
+      security: []
+      responses:
+        '200':
+          description: Tous les services sont OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+        '503':
+          description: Un ou plusieurs services sont en erreur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'

@@ -131,6 +131,7 @@ const CartIcon = () => (
 const titles: Record<string, string> = {
   '/validation-bdc': 'Validation BDC',
   '/a-facturer': 'A Facturer',
+  '/aide': 'Aide',
 };
 
 export function Topbar() {
