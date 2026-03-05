@@ -18,7 +18,6 @@ COPY --from=builder /app/package-lock.json ./
 RUN npm ci --omit=dev && chown -R nextjs:nodejs /app
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 
