@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBdcById, updateBdc } from '@/lib/db/queries/bdc';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const bdc = await getBdcById(params.id);
     if (!bdc) {
@@ -24,6 +28,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const body = await request.json();
 

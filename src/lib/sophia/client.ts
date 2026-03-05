@@ -62,21 +62,34 @@ class SophiaClient {
   async executeGraphQL<T = any>(query: string, variables?: Record<string, any>): Promise<T> {
     await this.ensureAuthenticated();
 
-    const response = await this.axiosInstance.post(
-      this.config.graphqlUrl,
-      { query, variables: variables || {} },
-      {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          'Content-Type': 'application/json',
-          'X-Organization-Id': this.config.organizationId,
-        },
+    let response;
+    try {
+      response = await this.axiosInstance.post(
+        this.config.graphqlUrl,
+        { query, variables: variables || {} },
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json',
+            'X-Organization-Id': this.config.organizationId,
+          },
+        }
+      );
+    } catch (err: any) {
+      const detail = err?.response?.data;
+      if (detail) {
+        console.error('Sophia HTTP error detail:', JSON.stringify(detail, null, 2));
+        throw new Error(`Sophia ${err.response.status}: ${JSON.stringify(detail)}`);
       }
-    );
+      throw err;
+    }
 
     if (response.data.errors) {
       console.error('Sophia GraphQL errors:', JSON.stringify(response.data.errors, null, 2));
-      throw new Error(`GraphQL: ${response.data.errors[0]?.message || 'Unknown error'}`);
+      const firstErr = response.data.errors[0];
+      const debugMsgs = firstErr?.extensions?.errors?.map((e: any) => e.debug_message).filter(Boolean);
+      const detail = debugMsgs?.length ? ` (${debugMsgs.join('; ')})` : '';
+      throw new Error(`GraphQL: ${firstErr?.message || 'Unknown error'}${detail}`);
     }
 
     return response.data.data;

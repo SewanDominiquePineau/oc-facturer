@@ -2,8 +2,14 @@
 
 import styled from 'styled-components';
 
+const TableWrapper = styled.div`
+  width: 100%;
+  overflow-x: auto;
+`;
+
 const Table = styled.table`
   width: 100%;
+  min-width: 150%;
   border-collapse: collapse;
   background: #fff;
   border-radius: 8px;
@@ -44,7 +50,7 @@ const Td = styled.td`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 300px;
 `;
 
 const EmptyState = styled.div`
@@ -91,35 +97,37 @@ export function DataTable<T extends Record<string, any>>({
   }
 
   return (
-    <Table>
-      <Thead>
-        <tr>
-          {columns.map(col => (
-            <Th key={col.key} style={col.width ? { width: col.width } : undefined}>
-              {col.header}
-            </Th>
-          ))}
-        </tr>
-      </Thead>
-      <tbody>
-        {data.map(row => {
-          const key = rowKey(row);
-          return (
-            <Tr
-              key={key}
-              $selected={selectedKey === key}
-              $muted={isRowMuted?.(row)}
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
-            >
-              {columns.map(col => (
-                <Td key={col.key}>
-                  {col.render ? col.render(row) : row[col.key]}
-                </Td>
-              ))}
-            </Tr>
-          );
-        })}
-      </tbody>
-    </Table>
+    <TableWrapper>
+      <Table>
+        <Thead>
+          <tr>
+            {columns.map(col => (
+              <Th key={col.key} style={col.width ? { width: col.width } : undefined}>
+                {col.header}
+              </Th>
+            ))}
+          </tr>
+        </Thead>
+        <tbody>
+          {data.map(row => {
+            const key = rowKey(row);
+            return (
+              <Tr
+                key={key}
+                $selected={selectedKey === key}
+                $muted={isRowMuted?.(row)}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
+                {columns.map(col => (
+                  <Td key={col.key}>
+                    {col.render ? col.render(row) : row[col.key]}
+                  </Td>
+                ))}
+              </Tr>
+            );
+          })}
+        </tbody>
+      </Table>
+    </TableWrapper>
   );
 }

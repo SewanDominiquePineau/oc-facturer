@@ -1,12 +1,20 @@
 'use client';
 
 import styled from 'styled-components';
+import { SophiaTopBar } from './SophiaTopBar';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
-const LayoutWrapper = styled.div`
+const RootWrapper = styled.div`
   display: flex;
+  flex-direction: column;
   height: 100vh;
+  overflow: hidden;
+`;
+
+const BodyWrapper = styled.div`
+  display: flex;
+  flex: 1;
   overflow: hidden;
 `;
 
@@ -25,12 +33,15 @@ const Content = styled.div`
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <LayoutWrapper>
-      <Sidebar />
-      <Main>
-        <Topbar />
-        <Content>{children}</Content>
-      </Main>
-    </LayoutWrapper>
+    <RootWrapper>
+      <SophiaTopBar />
+      <BodyWrapper>
+        <Sidebar />
+        <Main>
+          <Topbar />
+          <Content>{children}</Content>
+        </Main>
+      </BodyWrapper>
+    </RootWrapper>
   );
 }

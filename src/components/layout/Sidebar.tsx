@@ -51,15 +51,9 @@ export function Sidebar() {
 
   return (
     <SidebarWrapper>
-      <Logo>OC Facturer</Logo>
+      <Logo>OC Facturation</Logo>
       {navItems.map(item => (
         <NavItem key={item.href} href={item.href} $active={pathname === item.href}>
-          <span style={{
-            width: 24, height: 24, borderRadius: '50%', background: pathname === item.href ? '#A0EBF0' : '#E5E7EB',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600,
-          }}>
-            {item.icon}
-          </span>
           {item.label}
         </NavItem>
       ))}

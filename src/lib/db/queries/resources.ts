@@ -22,7 +22,7 @@ export async function updateResource(
   const allowedKeys = [
     'gdc_catalogRef', 'gdc_categoryId', 'gdc_serviceId', 'gdc_productName',
     'gdc_productName_update', 'gdc_contractId',
-    'gdc_id_product', 'gdc_itemStatus', 'gdc_hidden', 'id_site_sophia_go', 'code_produit',
+    'gdc_id_product', 'gdc_itemStatus', 'gdc_hidden', 'id_site_sophia_go', 'gdc_concernedSiteId', 'code_produit',
   ];
 
   const sets: string[] = [];

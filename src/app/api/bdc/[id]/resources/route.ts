@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getResourcesByBdcId } from '@/lib/db/queries/resources';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const resources = await getResourcesByBdcId(params.id);
     return NextResponse.json({ success: true, data: resources, count: resources.length });

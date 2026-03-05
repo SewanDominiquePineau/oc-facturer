@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSophiaClient } from '@/lib/sophia/client';
 import { GET_ORGANIZATIONS_CHILDREN } from '@/lib/sophia/queries';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const client = getSophiaClient();
     const result = await client.executeGraphQL(GET_ORGANIZATIONS_CHILDREN, {

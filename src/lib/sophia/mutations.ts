@@ -2,10 +2,10 @@ export const ADD_ARTICLE = `
   mutation Mutation($article: ContractArticleInput!) {
     contract {
       addArticle(article: $article) {
-        invoiceDate inServiceDate SAF amount id customName
-        catalogRef billingOrderRef
-        concernedSite { id }
-        resourceLink resourceLinkName itemStatus qty resourceLocationId
+        id catalogRef customName billingOrderRef
+        invoiceDate inServiceDate
+        amount SAF qty
+        itemStatus resourceLink resourceLinkName resourceLocationId
       }
     }
   }
@@ -20,15 +20,15 @@ export const ADD_ARTICLES = `
 `;
 
 export const UPDATE_ARTICLE = `
-  mutation UpdateArticle($id: ID!, $article: ContractArticleUpdateInput!) {
+  mutation UpdateArticle($id: UUID!, $article: ContractArticleUpdate!) {
     contract {
-      updateArticle(id: $id, article: $article) { id inServiceDate itemStatus }
+      updateArticle(id: $id, article: $article) { id inServiceDate terminationDate itemStatus }
     }
   }
 `;
 
 export const DELETE_ARTICLES = `
-  mutation DeleteArticles($ids: [ID!]!) {
+  mutation DeleteArticles($ids: [UUID!]!) {
     contract {
       deleteArticles(ids: $ids)
     }

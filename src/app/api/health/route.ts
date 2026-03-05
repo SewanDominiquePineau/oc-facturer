@@ -1,40 +1,34 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getDbPool } from '@/lib/db/connection';
 import { getSophiaClient } from '@/lib/sophia/client';
+import { requireAuth } from '@/lib/auth/middleware';
 
-export async function GET() {
-  const checks: Record<string, { status: string; message?: string }> = {};
+export async function GET(request: NextRequest) {
+  const auth = requireAuth(request);
+  if (auth instanceof NextResponse) return auth;
 
-  // Check DB
+  const checks: Record<string, { status: string }> = {};
+
   try {
     const pool = getDbPool();
     await pool.execute('SELECT 1');
     checks.database = { status: 'ok' };
-  } catch (error) {
-    checks.database = {
-      status: 'error',
-      message: error instanceof Error ? error.message : 'Unknown',
-    };
+  } catch {
+    checks.database = { status: 'error' };
   }
 
-  // Check Sophia
   try {
     const client = getSophiaClient();
     const ok = await client.testConnection();
-    checks.sophia = ok
-      ? { status: 'ok' }
-      : { status: 'error', message: 'Connection test failed' };
-  } catch (error) {
-    checks.sophia = {
-      status: 'error',
-      message: error instanceof Error ? error.message : 'Unknown',
-    };
+    checks.sophia = { status: ok ? 'ok' : 'error' };
+  } catch {
+    checks.sophia = { status: 'error' };
   }
 
   const allOk = Object.values(checks).every(c => c.status === 'ok');
 
   return NextResponse.json(
-    { status: allOk ? 'healthy' : 'degraded', checks, timestamp: new Date().toISOString() },
+    { status: allOk ? 'healthy' : 'degraded', checks },
     { status: allOk ? 200 : 503 }
   );
 }

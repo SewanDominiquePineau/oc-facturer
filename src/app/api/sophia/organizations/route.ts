@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSophiaClient } from '@/lib/sophia/client';
 import { GET_ORGANIZATION } from '@/lib/sophia/queries';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(request: NextRequest) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const { searchParams } = request.nextUrl;
     const orgId = searchParams.get('id') || process.env.SOPHIA_ORGANIZATION_ID!;

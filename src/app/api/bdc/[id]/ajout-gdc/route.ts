@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateBdc, getBdcById } from '@/lib/db/queries/bdc';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const body = await request.json();
 

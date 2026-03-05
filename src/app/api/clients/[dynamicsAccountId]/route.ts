@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getClientByDynamicsId } from '@/lib/db/queries/clients';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { dynamicsAccountId: string } }
 ) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const client = await getClientByDynamicsId(params.dynamicsAccountId);
 

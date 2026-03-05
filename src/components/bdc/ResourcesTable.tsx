@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { ResourceRow } from '@/types/resource';
 import { DataTable } from '@/components/shared/DataTable';
 import { Badge } from '@/components/shared/Badge';
@@ -21,11 +22,11 @@ function statusBadge(status: string | null) {
 }
 
 export function ResourcesTable({ resources, isLoading, onAddArticle, onDeleteArticle }: ResourcesTableProps) {
-  const columns = [
-    { key: 'code_produit', header: 'Code Produit', width: '140px' },
+  const columns = useMemo(() => [
+    { key: 'code_produit', header: 'Code Produit', width: '210px' },
     { key: 'nom', header: 'Produit' },
-    { key: 'nom_site', header: 'Site', width: '120px' },
-    { key: 'quantite', header: 'Qte', width: '50px' },
+    { key: 'nom_site', header: 'Site', width: '180px' },
+    { key: 'quantite', header: 'Qte', width: '75px' },
     {
       key: 'gdc_productName',
       header: 'Produit Sophia',
@@ -34,13 +35,13 @@ export function ResourcesTable({ resources, isLoading, onAddArticle, onDeleteArt
     {
       key: 'gdc_itemStatus',
       header: 'Statut GDC',
-      width: '110px',
+      width: '165px',
       render: (row: ResourceRow) => statusBadge(row.gdc_itemStatus),
     },
     {
       key: 'actions',
       header: '',
-      width: '120px',
+      width: '180px',
       render: (row: ResourceRow) => {
         const canAdd = !row.gdc_id_product && row.nom_site && row.gdc_catalogRef;
         const canDelete = !!row.gdc_id_product;
@@ -73,7 +74,7 @@ export function ResourcesTable({ resources, isLoading, onAddArticle, onDeleteArt
         );
       },
     },
-  ];
+  ], [onAddArticle, onDeleteArticle]);
 
   return (
     <DataTable

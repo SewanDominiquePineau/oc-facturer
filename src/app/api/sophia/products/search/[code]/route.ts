@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSophiaClient } from '@/lib/sophia/client';
 import { SEARCH_PRODUCTS } from '@/lib/sophia/queries';
 import { transformProductCode } from '@/lib/sophia/transform';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { code: string } }
 ) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const productCode = decodeURIComponent(params.code);
 
@@ -34,10 +38,11 @@ export async function GET(
       originalCode: productCode,
       transformedCode,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error(`GET /api/sophia/products/search/${params.code} error:`, error);
+    const detail = error?.response?.data || error?.message || 'Unknown error';
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Unknown error', detail },
       { status: 500 }
     );
   }

@@ -1,15 +1,27 @@
 'use client';
 
+import { useMemo } from 'react';
 import useSWR from 'swr';
 import { FacturationTab, FacturationFilter, ResourceRow } from '@/types/resource';
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  return res.json();
+};
 
-export function useFacturation(tab: FacturationTab, filter: FacturationFilter, search: string) {
-  const params = new URLSearchParams({ tab, filter });
+export function useFacturation(tab: FacturationTab, filter: FacturationFilter, search: string, page = 1, pageSize = 50) {
+  const params = new URLSearchParams({ tab, filter, page: String(page), pageSize: String(pageSize) });
   if (search) params.set('search', search);
 
-  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: ResourceRow[]; count: number }>(
+  const { data, error, isLoading, mutate } = useSWR<{
+    success: boolean;
+    data: ResourceRow[];
+    count: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }>(
     `/api/bdc/facturation?${params}`,
     fetcher,
     { refreshInterval: 30000 }
@@ -18,6 +30,7 @@ export function useFacturation(tab: FacturationTab, filter: FacturationFilter, s
   return {
     resources: data?.data || [],
     count: data?.count || 0,
+    totalPages: data?.totalPages || 1,
     isLoading,
     isError: !!error,
     mutate,
@@ -31,5 +44,5 @@ export function useCancelledBdcIds() {
     { refreshInterval: 60000 }
   );
 
-  return new Set(data?.data || []);
+  return useMemo(() => new Set(data?.data || []), [data?.data]);
 }

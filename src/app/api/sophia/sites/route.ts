@@ -1,19 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSophiaClient } from '@/lib/sophia/client';
-import { SEARCH_SITES } from '@/lib/sophia/queries';
+import { SEARCH_SITES_DETAILED } from '@/lib/sophia/queries';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(request: NextRequest) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const { searchParams } = request.nextUrl;
-    const organizationId = searchParams.get('organizationId') || process.env.SOPHIA_ORGANIZATION_ID!;
+    const organizationId = searchParams.get('organizationId') || searchParams.get('orgId') || process.env.SOPHIA_ORGANIZATION_ID!;
     const search = searchParams.get('search') || '';
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
 
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(SEARCH_SITES, {
+    const result = await client.executeGraphQL(SEARCH_SITES_DETAILED, {
       organizationId,
-      filters: { textSearch: search },
+      internalRecursive: true,
+      filters: search ? { textSearch: search } : undefined,
       pagination: { page, limit },
     });
 

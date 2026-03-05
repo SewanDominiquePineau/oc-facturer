@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { BdcRow } from '@/types/bdc';
 import { DataTable } from '@/components/shared/DataTable';
 import { Badge } from '@/components/shared/Badge';
@@ -13,7 +14,7 @@ interface BdcTableProps {
 }
 
 export function BdcTable({ data, isLoading, selectedId, onSelect, onToggleAjoutGdc }: BdcTableProps) {
-  const columns = [
+  const columns = useMemo(() => [
     { key: 'numero_bdc', header: 'N. Commande', width: '130px' },
     { key: 'per_name', header: 'Client' },
     { key: 'commercial_nom', header: 'Commercial', width: '120px' },
@@ -46,7 +47,7 @@ export function BdcTable({ data, isLoading, selectedId, onSelect, onToggleAjoutG
         />
       ),
     },
-  ];
+  ], [onToggleAjoutGdc]);
 
   return (
     <DataTable

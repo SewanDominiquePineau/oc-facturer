@@ -32,3 +32,20 @@ next-env.d.ts
 
 # temp
 /temp-init
+
+# IDE / agents
+.claude/
+.cursor/
+.cursorrules
+.mcp.json
+.playwright-mcp/
+
+# env
+.env
+
+# debug / temp files
+debug-*.mjs
+*.png
+screenshots/
+snapshot-*.md
+plan-*.md

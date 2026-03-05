@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getCancelledBdcIds } from '@/lib/db/queries/facturation';
+import { requireAuth } from '@/lib/auth/middleware';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   try {
     const cancelledIds = await getCancelledBdcIds();
     return NextResponse.json({ success: true, data: cancelledIds });

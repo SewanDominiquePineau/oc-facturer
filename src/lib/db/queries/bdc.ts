@@ -4,7 +4,12 @@ import { RowDataPacket } from 'mysql2';
 
 type BdcFilter = 'all' | 'sans_contrat' | 'plus_1mois' | 'enregistre';
 
-export async function getBdcList(filter: BdcFilter, search?: string): Promise<BonDeCommande[]> {
+export async function getBdcList(
+  filter: BdcFilter,
+  search?: string,
+  page = 1,
+  pageSize = 50
+): Promise<{ data: BonDeCommande[]; total: number }> {
   const pool = getDbPool();
 
   let where = `b.statut_bdc = 3 AND b.date_annulation IS NULL`;
@@ -25,16 +30,25 @@ export async function getBdcList(filter: BdcFilter, search?: string): Promise<Bo
     where += ` AND (b.numero_bdc LIKE ? OR b.per_name LIKE ? OR b.commercial_nom LIKE ?)`;
   }
 
-  const query = `
+  const searchParams = search ? [`%${search}%`, `%${search}%`, `%${search}%`] : [];
+
+  // Count total
+  const countQuery = `SELECT COUNT(*) as total FROM bon_de_commande b WHERE ${where}`;
+  const [countRows] = await pool.execute<RowDataPacket[]>(countQuery, searchParams);
+  const total = (countRows[0] as any).total;
+
+  // Paginated data
+  const offset = (page - 1) * pageSize;
+  const dataQuery = `
     SELECT b.*
     FROM bon_de_commande b
     WHERE ${where}
     ORDER BY b.cree_le DESC
+    LIMIT ${Number(pageSize)} OFFSET ${Number(offset)}
   `;
 
-  const params = search ? [`%${search}%`, `%${search}%`, `%${search}%`] : [];
-  const [rows] = await pool.execute<RowDataPacket[]>(query, params);
-  return rows as unknown as BonDeCommande[];
+  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, searchParams);
+  return { data: rows as unknown as BonDeCommande[], total };
 }
 
 export async function getBdcById(id: string): Promise<BonDeCommande | null> {
