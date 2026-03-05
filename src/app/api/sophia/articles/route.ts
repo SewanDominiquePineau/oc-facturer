@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
 
-  let article: Record<string, any> | undefined;
+  let article: Record<string, any> = {};
 
   try {
     const body = await request.json();

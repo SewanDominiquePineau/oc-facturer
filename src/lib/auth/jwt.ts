@@ -1,28 +1,30 @@
 import jwt from 'jsonwebtoken';
 import type { JwtPayload } from './types';
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is not set');
-}
-if (!process.env.JWT_REFRESH_SECRET) {
-  throw new Error('JWT_REFRESH_SECRET environment variable is not set');
+function getAccessSecret(): string {
+  const s = process.env.JWT_SECRET;
+  if (!s) throw new Error('JWT_SECRET environment variable is not set');
+  return s;
 }
 
-const ACCESS_SECRET = process.env.JWT_SECRET;
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+function getRefreshSecret(): string {
+  const s = process.env.JWT_REFRESH_SECRET;
+  if (!s) throw new Error('JWT_REFRESH_SECRET environment variable is not set');
+  return s;
+}
 
 export function signAccessToken(payload: JwtPayload): string {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '1h' });
+  return jwt.sign(payload, getAccessSecret(), { expiresIn: '1h' });
 }
 
 export function signRefreshToken(userId: string): string {
-  return jwt.sign({ userId }, REFRESH_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ userId }, getRefreshSecret(), { expiresIn: '7d' });
 }
 
 export function verifyAccessToken(token: string): JwtPayload {
-  return jwt.verify(token, ACCESS_SECRET) as JwtPayload;
+  return jwt.verify(token, getAccessSecret()) as JwtPayload;
 }
 
 export function verifyRefreshToken(token: string): { userId: string } {
-  return jwt.verify(token, REFRESH_SECRET) as { userId: string };
+  return jwt.verify(token, getRefreshSecret()) as { userId: string };
 }
