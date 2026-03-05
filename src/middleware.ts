@@ -1,24 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC_API_ROUTES = new Set([
-  '/api/health',
-  '/api/auth/login',
-  '/api/auth/refresh',
-]);
-
-function isPublicRoute(pathname: string): boolean {
-  const normalized = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
-  return PUBLIC_API_ROUTES.has(normalized);
-}
-
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const pathname = request.nextUrl.pathname;
 
-  if (!pathname.startsWith('/api/')) return NextResponse.next();
-  if (isPublicRoute(pathname)) return NextResponse.next();
+  if (
+    pathname === '/api/health' ||
+    pathname === '/api/auth/login' ||
+    pathname === '/api/auth/refresh'
+  ) {
+    return NextResponse.next();
+  }
 
   const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return NextResponse.json(
       { success: false, message: 'Token manquant' },
       { status: 401 }
