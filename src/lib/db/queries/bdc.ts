@@ -37,17 +37,18 @@ export async function getBdcList(
   const [countRows] = await pool.execute<RowDataPacket[]>(countQuery, searchParams);
   const total = (countRows[0] as RowDataPacket & { total: number }).total;
 
-  // Paginated data
-  const offset = (page - 1) * pageSize;
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.min(200, Math.max(1, pageSize));
+  const offset = (safePage - 1) * safePageSize;
   const dataQuery = `
     SELECT b.*
     FROM bon_de_commande b
     WHERE ${where}
     ORDER BY b.cree_le DESC
-    LIMIT ${Number(pageSize)} OFFSET ${Number(offset)}
+    LIMIT ? OFFSET ?
   `;
 
-  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, searchParams);
+  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, [...searchParams, safePageSize, offset]);
   return { data: rows as unknown as BonDeCommande[], total };
 }
 

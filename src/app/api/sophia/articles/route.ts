@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSophiaClient } from '@/lib/sophia/client';
 import { ADD_ARTICLE, DELETE_ARTICLES } from '@/lib/sophia/mutations';
 import { requireAuth } from '@/lib/auth/middleware';
-import { isValidUUID } from '@/lib/validation';
+import { isValidUUID, safeJson } from '@/lib/validation';
+
+const ARTICLE_ALLOWED_FIELDS = new Set([
+  'contractId', 'catalogRef', 'concernedSiteId', 'description',
+  'amount', 'SAF', 'qty', 'startDate', 'endDate', 'productId',
+  'billingMode', 'commitment',
+]);
 
 export async function POST(request: NextRequest) {
   const user = requireAuth(request);
@@ -11,24 +17,37 @@ export async function POST(request: NextRequest) {
   let articleRef = '';
 
   try {
-    const body = await request.json();
+    const body = await safeJson(request);
+    if (body instanceof NextResponse) return body;
+    const rawBody = body as Record<string, unknown>;
 
-    if (!body.article || typeof body.article !== 'object') {
+    if (!rawBody.article || typeof rawBody.article !== 'object') {
       return NextResponse.json(
         { success: false, message: 'article requis (objet)' },
         { status: 400 }
       );
     }
 
-    const { contractId, catalogRef } = body.article;
-    if (!contractId || !catalogRef) {
+    const rawArticle = rawBody.article as Record<string, unknown>;
+    const { contractId, catalogRef } = rawArticle;
+    if (!contractId || !catalogRef || typeof contractId !== 'string' || typeof catalogRef !== 'string') {
       return NextResponse.json(
         { success: false, message: 'contractId et catalogRef requis dans article' },
         { status: 400 }
       );
     }
 
-    const article: Record<string, unknown> = { ...body.article };
+    if (!isValidUUID(contractId)) {
+      return NextResponse.json(
+        { success: false, message: 'contractId doit etre un UUID valide' },
+        { status: 400 }
+      );
+    }
+
+    const article: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(rawArticle)) {
+      if (ARTICLE_ALLOWED_FIELDS.has(k)) article[k] = v;
+    }
     articleRef = String(catalogRef);
     if (article.amount != null) article.amount = parseFloat(String(article.amount)) || 0;
     if (article.SAF != null) article.SAF = parseFloat(String(article.SAF)) || 0;
@@ -67,8 +86,9 @@ export async function DELETE(request: NextRequest) {
   if (user instanceof NextResponse) return user;
 
   try {
-    const body = await request.json();
-    const ids = body.ids;
+    const body = await safeJson(request);
+    if (body instanceof NextResponse) return body;
+    const ids = (body as Record<string, unknown>).ids;
 
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ success: false, message: 'ids requis (tableau non vide)' }, { status: 400 });

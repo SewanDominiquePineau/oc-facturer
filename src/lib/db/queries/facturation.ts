@@ -64,8 +64,9 @@ export async function getFacturationResources(
   const [countRows] = await pool.execute<RowDataPacket[]>(countQuery, searchParams);
   const total = (countRows[0] as RowDataPacket & { total: number }).total;
 
-  // Paginated data
-  const offset = (page - 1) * pageSize;
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.min(200, Math.max(1, pageSize));
+  const offset = (safePage - 1) * safePageSize;
   const dataQuery = `
     SELECT r.*, b.numero_bdc, b.per_name, b.gdc_contractId as bdc_gdc_contractId,
            b.gdc_contractName as bdc_gdc_contractName, b.gdc_invoicedEntityId as bdc_gdc_invoicedEntityId,
@@ -100,10 +101,10 @@ export async function getFacturationResources(
     LEFT JOIN bon_de_commande b_ann ON b_ann.id_bon_de_commande = va.id_bon_annule
     WHERE ${where}
     ORDER BY ${sortKey && SORTABLE_COLUMNS[sortKey] ? `${SORTABLE_COLUMNS[sortKey]} ${sortDir === 'asc' ? 'ASC' : 'DESC'}` : `${dateColumn} DESC`}
-    LIMIT ${Number(pageSize)} OFFSET ${Number(offset)}
+    LIMIT ? OFFSET ?
   `;
 
-  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, searchParams);
+  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, [...searchParams, safePageSize, offset]);
   return { data: rows, total };
 }
 

@@ -6,7 +6,7 @@ import type { JwtPayload } from '@/lib/auth/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const ip = request.headers.get('x-real-ip') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '0.0.0.0';
     const rlKey = `refresh:${ip}`;
     const { allowed, retryAfterMs } = await checkRateLimit(rlKey, 20, 5 * 60 * 1000);
     if (!allowed) {

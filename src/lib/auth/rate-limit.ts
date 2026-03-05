@@ -1,4 +1,5 @@
 import { getDbPool } from '@/lib/db/connection';
+import { RowDataPacket } from 'mysql2';
 
 const DEFAULT_WINDOW_MS = 15 * 60 * 1000;
 const DEFAULT_MAX_ATTEMPTS = 5;
@@ -29,12 +30,12 @@ export async function checkRateLimit(
 
   await pool.execute('DELETE FROM rate_limit WHERE reset_at < ?', [now]);
 
-  const [rows] = await pool.execute<any[]>(
-    'SELECT count, reset_at FROM rate_limit WHERE rl_key = ?',
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    'SELECT count, reset_at FROM rate_limit WHERE rl_key = ? FOR UPDATE',
     [key]
   );
 
-  const entry = rows[0];
+  const entry = rows[0] as (RowDataPacket & { count: number; reset_at: number }) | undefined;
 
   if (!entry) {
     await pool.execute(

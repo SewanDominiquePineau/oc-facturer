@@ -3,7 +3,7 @@ import { getSophiaClient } from '@/lib/sophia/client';
 import { GET_SITE_DETAIL, CHECK_SITE_IN_CONTRACT } from '@/lib/sophia/queries';
 import { requireAuth } from '@/lib/auth/middleware';
 import { getDbPool } from '@/lib/db/connection';
-import { isValidUUID } from '@/lib/validation';
+import { isValidUUID, safeJson } from '@/lib/validation';
 import { RowDataPacket } from 'mysql2';
 
 export async function POST(request: NextRequest) {
@@ -11,8 +11,10 @@ export async function POST(request: NextRequest) {
   if (user instanceof NextResponse) return user;
 
   try {
-    const body = await request.json();
-    const { siteId, resourceId, contractId } = body;
+    const body = await safeJson(request);
+    if (body instanceof NextResponse) return body;
+
+    const { siteId, resourceId, contractId } = body as { siteId?: string; resourceId?: string; contractId?: string };
 
     if (!siteId || !resourceId || !contractId) {
       return NextResponse.json(
@@ -21,9 +23,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!isValidUUID(siteId) || !isValidUUID(contractId)) {
+    if (!isValidUUID(siteId) || !isValidUUID(contractId) || !isValidUUID(resourceId)) {
       return NextResponse.json(
-        { success: false, message: 'siteId et contractId doivent etre des UUID valides' },
+        { success: false, message: 'siteId, contractId et resourceId doivent etre des identifiants valides' },
         { status: 400 }
       );
     }
@@ -117,7 +119,7 @@ export async function POST(request: NextRequest) {
     // 4. Update resource with site references + gdc_concernedSiteId (verified)
     await pool.execute(
       `UPDATE ressource_dpl SET id_site_sophia_go = ?, gdc_concernedSiteId = ?, site = ?, nom_site = ? WHERE id_dpl = ?`,
-      [site.id, site.id, siteIdFk, site.name, resourceId]
+      [site.id ?? null, site.id ?? null, siteIdFk, site.name ?? null, resourceId]
     );
 
     return NextResponse.json({
@@ -131,7 +133,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('POST /api/sophia/sites/select error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

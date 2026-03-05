@@ -24,8 +24,11 @@ export async function GET(
     const transformedCode = transformProductCode(productCode);
     const client = getSophiaClient();
 
+    const organizationId = process.env.SOPHIA_ORGANIZATION_ID;
+    if (!organizationId) return NextResponse.json({ success: false, message: 'Configuration serveur manquante' }, { status: 500 });
+
     const result = await client.executeGraphQL<{ contract?: { searchProducts?: unknown[] } }>(SEARCH_PRODUCTS, {
-      organizationId: process.env.SOPHIA_ORGANIZATION_ID!,
+      organizationId,
       search: transformedCode,
     });
 
@@ -38,11 +41,11 @@ export async function GET(
       originalCode: productCode,
       transformedCode,
     });
-  } catch (error: any) {
-    console.error(`GET /api/sophia/products/search/${params.code} error:`, error);
-    const detail = error?.response?.data || error?.message || 'Unknown error';
+  } catch (error: unknown) {
+    console.error('GET /api/sophia/products/search/[code] error:', error);
+    const errMsg = error instanceof Error ? error.message : 'Erreur serveur';
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error', detail },
+      { success: false, message: errMsg },
       { status: 500 }
     );
   }

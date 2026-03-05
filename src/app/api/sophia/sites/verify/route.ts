@@ -6,6 +6,10 @@ import { getDbPool } from '@/lib/db/connection';
 import { isValidUUID } from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
+  return POST(request);
+}
+
+export async function POST(request: NextRequest) {
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
 

@@ -10,9 +10,10 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const search = searchParams.get('search') || '';
-    const orgId = searchParams.get('organizationId') || process.env.SOPHIA_ORGANIZATION_ID!;
-    const limit = parseInt(searchParams.get('limit') || '25', 10);
-    const page = parseInt(searchParams.get('page') || '1', 10);
+    const orgId = process.env.SOPHIA_ORGANIZATION_ID;
+    if (!orgId) return NextResponse.json({ success: false, message: 'Configuration serveur manquante' }, { status: 500 });
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '25', 10) || 25, 1), 100);
+    const page = Math.max(parseInt(searchParams.get('page') || '1', 10) || 1, 1);
 
     const client = getSophiaClient();
     const result = await client.executeGraphQL<{ contract?: { list?: { edges?: unknown[]; pageInfo?: { count?: number } } } }>(CONTRACTS_LIST, {
@@ -24,7 +25,8 @@ export async function GET(request: NextRequest) {
     });
 
     const data = result?.contract?.list;
-    const contracts = (data?.edges || []).map((edge: any) => ({
+    interface ContractEdge { id?: string; contractNumber?: string; status?: string; client?: { id?: string; name?: string }; lastUpdate?: string }
+    const contracts = ((data?.edges || []) as ContractEdge[]).map((edge) => ({
       id: edge.id,
       name: edge.contractNumber,
       status: edge.status,
@@ -44,7 +46,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET /api/sophia/contracts error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

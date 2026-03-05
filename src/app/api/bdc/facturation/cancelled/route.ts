@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET /api/bdc/facturation/cancelled error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

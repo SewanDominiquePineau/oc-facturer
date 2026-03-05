@@ -9,10 +9,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = request.nextUrl;
-    const organizationId = searchParams.get('organizationId') || searchParams.get('orgId') || process.env.SOPHIA_ORGANIZATION_ID!;
+    const organizationId = process.env.SOPHIA_ORGANIZATION_ID;
+    if (!organizationId) return NextResponse.json({ success: false, message: 'Configuration serveur manquante' }, { status: 500 });
     const search = searchParams.get('search') || '';
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const page = Math.max(parseInt(searchParams.get('page') || '1', 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10) || 20, 1), 100);
 
     const client = getSophiaClient();
     const result = await client.executeGraphQL<{ site?: { getSites?: { edges?: unknown[]; pageInfo?: { count?: number } } } }>(SEARCH_SITES_DETAILED, {
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET /api/sophia/sites error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }
