@@ -96,24 +96,38 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
   const pages = getPageNumbers(page, totalPages);
 
   return (
-    <Wrapper>
+    <Wrapper role="navigation" aria-label="Pagination">
       <Info>
         {from}–{to} sur {total}
       </Info>
       <Controls>
-        <PageButton disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+        <PageButton
+          disabled={page <= 1}
+          onClick={() => onPageChange(page - 1)}
+          aria-label="Page précédente"
+        >
           ‹
         </PageButton>
         {pages.map((p, i) =>
           p === '...' ? (
             <Ellipsis key={`e${i}`}>…</Ellipsis>
           ) : (
-            <PageButton key={p} $active={p === page} onClick={() => onPageChange(p)}>
+            <PageButton
+              key={p}
+              $active={p === page}
+              onClick={() => onPageChange(p)}
+              aria-label={`Page ${p}`}
+              aria-current={p === page ? 'page' : undefined}
+            >
               {p}
             </PageButton>
           )
         )}
-        <PageButton disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
+        <PageButton
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(page + 1)}
+          aria-label="Page suivante"
+        >
           ›
         </PageButton>
       </Controls>

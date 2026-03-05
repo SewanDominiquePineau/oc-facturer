@@ -60,6 +60,33 @@ const EmptyState = styled.div`
   font-size: 14px;
 `;
 
+const pulse = `
+  @keyframes skeleton-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+`;
+
+const SkeletonWrap = styled.div`
+  ${pulse}
+  padding: 8px 0;
+`;
+
+const SkeletonRow = styled.div`
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #E5E7EB;
+`;
+
+const SkeletonCell = styled.div`
+  flex: 1;
+  height: 16px;
+  background: #E5E7EB;
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+`;
+
 interface Column<T> {
   key: string;
   header: string;
@@ -89,7 +116,19 @@ export function DataTable<T extends Record<string, any>>({
   isLoading,
 }: DataTableProps<T>) {
   if (isLoading) {
-    return <EmptyState>Chargement...</EmptyState>;
+    return (
+      <TableWrapper>
+        <SkeletonWrap role="status" aria-label="Chargement des données">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonRow key={i}>
+              {columns.map(col => (
+                <SkeletonCell key={col.key} />
+              ))}
+            </SkeletonRow>
+          ))}
+        </SkeletonWrap>
+      </TableWrapper>
+    );
   }
 
   if (data.length === 0) {
@@ -98,11 +137,11 @@ export function DataTable<T extends Record<string, any>>({
 
   return (
     <TableWrapper>
-      <Table>
+      <Table role="table">
         <Thead>
           <tr>
             {columns.map(col => (
-              <Th key={col.key} style={col.width ? { width: col.width } : undefined}>
+              <Th key={col.key} scope="col" style={col.width ? { width: col.width } : undefined}>
                 {col.header}
               </Th>
             ))}

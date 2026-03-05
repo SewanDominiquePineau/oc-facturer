@@ -135,7 +135,12 @@ export function SiteSearchModal({ organizationId, onSelect, onClose }: SiteSearc
 
   useEffect(() => {
     inputRef.current?.focus();
-  }, []);
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
 
   useEffect(() => {
     if (!organizationId) return;
@@ -166,11 +171,11 @@ export function SiteSearchModal({ organizationId, onSelect, onClose }: SiteSearc
   }, [organizationId, debouncedSearch]);
 
   return (
-    <Overlay onClick={onClose}>
-      <Modal onClick={e => e.stopPropagation()}>
+    <Overlay onClick={onClose} role="presentation">
+      <Modal onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Rechercher un site">
         <Header>
-          <Title>Rechercher un site</Title>
-          <CloseBtn onClick={onClose}>&times;</CloseBtn>
+          <Title id="site-search-title">Rechercher un site</Title>
+          <CloseBtn onClick={onClose} aria-label="Fermer">&times;</CloseBtn>
         </Header>
 
         <SearchInput
@@ -178,6 +183,7 @@ export function SiteSearchModal({ organizationId, onSelect, onClose }: SiteSearc
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Nom du site, adresse..."
+          aria-label="Rechercher un site par nom ou adresse"
         />
 
         <ResultsList>

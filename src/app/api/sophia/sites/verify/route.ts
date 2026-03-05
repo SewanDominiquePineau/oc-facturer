@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(CHECK_SITE_IN_CONTRACT, {
+    const result = await client.executeGraphQL<{ contract?: { get?: { client?: { id?: string; name?: string } } }; organization?: { getHierarchy?: { id: string; name: string; type: string }[] }; site?: { getSite?: { livePerId?: string } } }>(CHECK_SITE_IN_CONTRACT, {
       contractId,
       siteId,
     });

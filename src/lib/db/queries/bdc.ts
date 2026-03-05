@@ -35,7 +35,7 @@ export async function getBdcList(
   // Count total
   const countQuery = `SELECT COUNT(*) as total FROM bon_de_commande b WHERE ${where}`;
   const [countRows] = await pool.execute<RowDataPacket[]>(countQuery, searchParams);
-  const total = (countRows[0] as any).total;
+  const total = (countRows[0] as RowDataPacket & { total: number }).total;
 
   // Paginated data
   const offset = (page - 1) * pageSize;
@@ -69,16 +69,16 @@ const BDC_ALLOWED_FIELDS = new Set([
 
 export async function updateBdc(
   id: string,
-  fields: Record<string, any>
+  fields: Record<string, unknown>
 ): Promise<void> {
   const pool = getDbPool();
   const sets: string[] = [];
-  const values: any[] = [];
+  const values: (string | number | null)[] = [];
 
   for (const [key, val] of Object.entries(fields)) {
     if (val !== undefined && BDC_ALLOWED_FIELDS.has(key)) {
       sets.push(`${key} = ?`);
-      values.push(val);
+      values.push(val as string | number | null);
     }
   }
 

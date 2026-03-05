@@ -17,7 +17,7 @@ export async function GET(
 
   try {
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(GET_ARTICLE, { id: params.id });
+    const result = await client.executeGraphQL<{ contract?: { getArticle?: unknown } }>(GET_ARTICLE, { id: params.id });
 
     return NextResponse.json({
       success: true,
@@ -47,7 +47,7 @@ export async function PATCH(
     if (body instanceof NextResponse) return body;
 
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(UPDATE_ARTICLE, {
+    const result = await client.executeGraphQL<{ contract?: { updateArticle?: unknown } }>(UPDATE_ARTICLE, {
       id: params.id,
       article: (body as Record<string, unknown>).article,
     });

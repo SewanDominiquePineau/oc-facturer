@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const rateLimitKey = `login:${email.toLowerCase()}`;
-    const { allowed, retryAfterMs } = checkRateLimit(rateLimitKey);
+    const { allowed, retryAfterMs } = await checkRateLimit(rateLimitKey);
     if (!allowed) {
       const retryAfterSec = Math.ceil(retryAfterMs / 1000);
       return NextResponse.json(
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    resetRateLimit(rateLimitKey);
+    await resetRateLimit(rateLimitKey);
 
     const payload: JwtPayload = {
       userId: user.id_utilisateur,

@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
 
-  let article: Record<string, any> = {};
+  let articleRef = '';
 
   try {
     const body = await request.json();
@@ -28,31 +28,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    article = { ...body.article };
+    const article: Record<string, unknown> = { ...body.article };
+    articleRef = String(catalogRef);
     if (article.amount != null) article.amount = parseFloat(String(article.amount)) || 0;
     if (article.SAF != null) article.SAF = parseFloat(String(article.SAF)) || 0;
-    if (article.qty != null) article.qty = parseInt(String(article.qty), 10) || 1;
+    if (article.qty != null) article.qty = parseInt(String(article.qty as string), 10) || 1;
 
-    if (article.SAF === 0) delete article.SAF;
-    if (article.amount === 0) delete article.amount;
+    const isMZ = articleRef.endsWith('-M') || articleRef.endsWith('-Z');
+    if (article.SAF === 0 && !isMZ) delete article.SAF;
+    if (article.amount === 0 && !isMZ) delete article.amount;
 
-    console.log('[SOPHIA] addArticle payload:', JSON.stringify(article, null, 2));
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[SOPHIA] addArticle catalogRef:', articleRef);
+    }
 
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(ADD_ARTICLE, { article });
+    const result = await client.executeGraphQL<{ contract?: { addArticle?: unknown } }>(ADD_ARTICLE, { article });
 
     return NextResponse.json({
       success: true,
       data: result?.contract?.addArticle,
-      sentPayload: article,
     });
   } catch (error) {
-    console.error('POST /api/sophia/articles error:', error);
+    console.error('POST /api/sophia/articles error:', error instanceof Error ? error.message : error);
     return NextResponse.json(
       {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error',
-        sentPayload: article,
+        message: error instanceof Error ? error.message : 'Erreur serveur',
+        ref: articleRef,
       },
       { status: 500 }
     );
@@ -63,11 +66,8 @@ export async function DELETE(request: NextRequest) {
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
 
-  let payload: { ids?: unknown } | undefined;
-
   try {
     const body = await request.json();
-    payload = body;
     const ids = body.ids;
 
     if (!Array.isArray(ids) || ids.length === 0) {
@@ -78,23 +78,19 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Tous les ids doivent etre des UUID valides' }, { status: 400 });
     }
 
-    console.log('[SOPHIA] deleteArticles payload:', JSON.stringify(ids));
-
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(DELETE_ARTICLES, { ids });
+    const result = await client.executeGraphQL<{ contract?: { deleteArticles?: unknown } }>(DELETE_ARTICLES, { ids });
 
     return NextResponse.json({
       success: true,
       data: result?.contract?.deleteArticles,
-      sentPayload: { ids },
     });
   } catch (error) {
-    console.error('DELETE /api/sophia/articles error:', error);
+    console.error('DELETE /api/sophia/articles error:', error instanceof Error ? error.message : error);
     return NextResponse.json(
       {
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error',
-        sentPayload: payload,
+        message: error instanceof Error ? error.message : 'Erreur serveur',
       },
       { status: 500 }
     );

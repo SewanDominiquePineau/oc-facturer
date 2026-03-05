@@ -62,7 +62,7 @@ export async function getFacturationResources(
     WHERE ${where}
   `;
   const [countRows] = await pool.execute<RowDataPacket[]>(countQuery, searchParams);
-  const total = (countRows[0] as any).total;
+  const total = (countRows[0] as RowDataPacket & { total: number }).total;
 
   // Paginated data
   const offset = (page - 1) * pageSize;
@@ -169,5 +169,5 @@ export async function getCancelledBdcIds(): Promise<string[]> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT id_bon_origine FROM vue_bdc_annules`
   );
-  return (rows as any[]).map(r => r.id_bon_origine);
+  return (rows as Array<{ id_bon_origine: string }>).map(r => r.id_bon_origine);
 }

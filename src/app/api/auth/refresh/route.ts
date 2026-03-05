@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const rlKey = `refresh:${ip}`;
-    const { allowed, retryAfterMs } = checkRateLimit(rlKey, 20, 5 * 60 * 1000);
+    const { allowed, retryAfterMs } = await checkRateLimit(rlKey, 20, 5 * 60 * 1000);
     if (!allowed) {
       return NextResponse.json(
         { success: false, message: 'Trop de requêtes' },

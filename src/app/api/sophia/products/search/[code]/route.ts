@@ -24,7 +24,7 @@ export async function GET(
     const transformedCode = transformProductCode(productCode);
     const client = getSophiaClient();
 
-    const result = await client.executeGraphQL(SEARCH_PRODUCTS, {
+    const result = await client.executeGraphQL<{ contract?: { searchProducts?: unknown[] } }>(SEARCH_PRODUCTS, {
       organizationId: process.env.SOPHIA_ORGANIZATION_ID!,
       search: transformedCode,
     });

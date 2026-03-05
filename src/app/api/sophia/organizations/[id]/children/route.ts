@@ -16,7 +16,7 @@ export async function GET(
 
   try {
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(GET_ORGANIZATIONS_CHILDREN, {
+    const result = await client.executeGraphQL<{ organization?: { getOrganizations?: { organizations?: unknown[] } } }>(GET_ORGANIZATIONS_CHILDREN, {
       parentOrganizationId: params.id,
     });
 

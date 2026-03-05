@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getDbPool } from '@/lib/db/connection';
 import { getSophiaClient } from '@/lib/sophia/client';
+import { requireAuth } from '@/lib/auth/middleware';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const user = requireAuth(request);
+  if (user instanceof NextResponse) return user;
+
   const checks: Record<string, { status: string }> = {};
 
   try {

@@ -1,41 +1,68 @@
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
-
-const store = new Map<string, RateLimitEntry>();
+import { getDbPool } from '@/lib/db/connection';
 
 const DEFAULT_WINDOW_MS = 15 * 60 * 1000;
 const DEFAULT_MAX_ATTEMPTS = 5;
 
-setInterval(() => {
-  const now = Date.now();
-  store.forEach((entry, key) => {
-    if (now > entry.resetAt) store.delete(key);
-  });
-}, 60_000);
+let tableChecked = false;
 
-export function checkRateLimit(
+async function ensureTable() {
+  if (tableChecked) return;
+  const pool = getDbPool();
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS rate_limit (
+      rl_key VARCHAR(255) PRIMARY KEY,
+      count INT NOT NULL DEFAULT 1,
+      reset_at BIGINT NOT NULL
+    )
+  `);
+  tableChecked = true;
+}
+
+export async function checkRateLimit(
   key: string,
   maxAttempts = DEFAULT_MAX_ATTEMPTS,
   windowMs = DEFAULT_WINDOW_MS
-): { allowed: boolean; remaining: number; retryAfterMs: number } {
+): Promise<{ allowed: boolean; remaining: number; retryAfterMs: number }> {
+  await ensureTable();
+  const pool = getDbPool();
   const now = Date.now();
-  const entry = store.get(key);
 
-  if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs });
+  await pool.execute('DELETE FROM rate_limit WHERE reset_at < ?', [now]);
+
+  const [rows] = await pool.execute<any[]>(
+    'SELECT count, reset_at FROM rate_limit WHERE rl_key = ?',
+    [key]
+  );
+
+  const entry = rows[0];
+
+  if (!entry) {
+    await pool.execute(
+      'INSERT INTO rate_limit (rl_key, count, reset_at) VALUES (?, 1, ?)',
+      [key, now + windowMs]
+    );
     return { allowed: true, remaining: maxAttempts - 1, retryAfterMs: 0 };
   }
 
-  entry.count++;
-  if (entry.count > maxAttempts) {
-    return { allowed: false, remaining: 0, retryAfterMs: entry.resetAt - now };
+  const newCount = entry.count + 1;
+  await pool.execute(
+    'UPDATE rate_limit SET count = ? WHERE rl_key = ?',
+    [newCount, key]
+  );
+
+  if (newCount > maxAttempts) {
+    return { allowed: false, remaining: 0, retryAfterMs: Number(entry.reset_at) - now };
   }
 
-  return { allowed: true, remaining: maxAttempts - entry.count, retryAfterMs: 0 };
+  return { allowed: true, remaining: maxAttempts - newCount, retryAfterMs: 0 };
 }
 
-export function resetRateLimit(key: string): void {
-  store.delete(key);
+export async function resetRateLimit(key: string): Promise<void> {
+  try {
+    await ensureTable();
+    const pool = getDbPool();
+    await pool.execute('DELETE FROM rate_limit WHERE rl_key = ?', [key]);
+  } catch {
+    // silently ignore cleanup errors
+  }
 }

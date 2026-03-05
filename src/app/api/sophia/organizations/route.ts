@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const orgId = searchParams.get('id') || process.env.SOPHIA_ORGANIZATION_ID!;
 
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(GET_ORGANIZATION, { id: orgId });
+    const result = await client.executeGraphQL<{ organization?: { getOrganization?: unknown } }>(GET_ORGANIZATION, { id: orgId });
 
     return NextResponse.json({
       success: true,

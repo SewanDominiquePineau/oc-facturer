@@ -4,6 +4,7 @@ import { GET_SITE_DETAIL, CHECK_SITE_IN_CONTRACT } from '@/lib/sophia/queries';
 import { requireAuth } from '@/lib/auth/middleware';
 import { getDbPool } from '@/lib/db/connection';
 import { isValidUUID } from '@/lib/validation';
+import { RowDataPacket } from 'mysql2';
 
 export async function POST(request: NextRequest) {
   const user = requireAuth(request);
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     const sophia = getSophiaClient();
 
     // 1. Verify site belongs to contract client
-    const verifyResult = await sophia.executeGraphQL(CHECK_SITE_IN_CONTRACT, {
+    const verifyResult = await sophia.executeGraphQL<{ contract?: { get?: { client?: { id?: string; name?: string } } }; organization?: { getHierarchy?: { id: string; name: string; type: string }[] } }>(CHECK_SITE_IN_CONTRACT, {
       contractId,
       siteId,
     });
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Get site details from Sophia
-    const siteResult = await sophia.executeGraphQL(GET_SITE_DETAIL, { id: siteId });
+    const siteResult = await sophia.executeGraphQL<{ site?: { getSite?: { id?: string; name?: string; address?: { street?: string; zipCode?: string; city?: string; complement?: string } } } }>(GET_SITE_DETAIL, { id: siteId });
     const site = siteResult?.site?.getSite;
 
     if (!site) {
@@ -72,11 +73,11 @@ export async function POST(request: NextRequest) {
       .filter(Boolean).join(', ');
 
     // Check if site already exists by id_sophia_go
-    const [existingRows] = await pool.execute(
+    const [existingRows] = await pool.execute<RowDataPacket[]>(
       `SELECT id_site FROM site WHERE id_sophia_go = ? LIMIT 1`,
-      [site.id]
+      [site.id ?? '']
     );
-    const existingRow = (existingRows as any[])[0];
+    const existingRow = existingRows[0];
 
     let siteIdFk: string;
 
@@ -86,11 +87,11 @@ export async function POST(request: NextRequest) {
         `UPDATE site SET site_nom_sophia = ?, adresse_voie = ?, adresse_code_postal = ?, adresse_ville = ?, adresse_complement = ?
          WHERE id_site = ?`,
         [
-          site.name,
-          address.street || null,
-          address.zipCode || null,
-          address.city || null,
-          address.complement || null,
+          site.name ?? null,
+          address.street ?? null,
+          address.zipCode ?? null,
+          address.city ?? null,
+          address.complement ?? null,
           existingRow.id_site,
         ]
       );
@@ -103,12 +104,12 @@ export async function POST(request: NextRequest) {
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           siteIdFk,
-          site.id,
-          site.name,
-          address.street || null,
-          address.zipCode || null,
-          address.city || null,
-          address.complement || null,
+          site.id ?? '',
+          site.name ?? null,
+          address.street ?? null,
+          address.zipCode ?? null,
+          address.city ?? null,
+          address.complement ?? null,
         ]
       );
     }

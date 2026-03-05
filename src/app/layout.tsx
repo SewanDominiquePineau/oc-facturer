@@ -3,6 +3,7 @@ import StyledComponentsRegistry from '@/theme/StyledComponentsRegistry';
 import { GlobalStyle } from '@/theme/GlobalStyle';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SWRProvider } from '@/components/providers/SWRProvider';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,9 +18,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <StyledComponentsRegistry>
           <GlobalStyle />
-          <SWRProvider>
-            <AppLayout>{children}</AppLayout>
-          </SWRProvider>
+          <ErrorBoundary>
+            <SWRProvider>
+              <AppLayout>{children}</AppLayout>
+            </SWRProvider>
+          </ErrorBoundary>
         </StyledComponentsRegistry>
       </body>
     </html>

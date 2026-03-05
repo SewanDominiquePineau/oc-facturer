@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
 
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(CONTRACTS_LIST, {
+    const result = await client.executeGraphQL<{ contract?: { list?: { edges?: unknown[]; pageInfo?: { count?: number } } } }>(CONTRACTS_LIST, {
       organizationId: orgId,
       pagination: { page, limit },
       status: [],

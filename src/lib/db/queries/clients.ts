@@ -26,5 +26,5 @@ export async function getLastBdcWithContractForClient(
      LIMIT 1`,
     [dynamicsAccountId, excludeBdcId]
   );
-  return (rows[0] as any) ?? null;
+  return (rows[0] as RowDataPacket & { gdc_contractId: string; gdc_contractName: string; gdc_invoicedEntityId: string; gdc_invoicedEntityName: string } | undefined) ?? null;
 }

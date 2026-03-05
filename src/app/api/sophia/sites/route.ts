@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20', 10);
 
     const client = getSophiaClient();
-    const result = await client.executeGraphQL(SEARCH_SITES_DETAILED, {
+    const result = await client.executeGraphQL<{ site?: { getSites?: { edges?: unknown[]; pageInfo?: { count?: number } } } }>(SEARCH_SITES_DETAILED, {
       organizationId,
       internalRecursive: true,
       filters: search ? { textSearch: search } : undefined,

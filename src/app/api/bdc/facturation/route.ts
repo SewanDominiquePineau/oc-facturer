@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || undefined;
     const { page, pageSize } = safePagination(searchParams);
     const sortKey = searchParams.get('sortKey') || undefined;
-    const sortDir = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
+    const rawSortDir = searchParams.get('sortDir') || 'asc';
+    const sortDir: 'asc' | 'desc' = rawSortDir === 'desc' ? 'desc' : 'asc';
 
     const { data, total } = await getFacturationResources(tab, filter, search, page, pageSize, sortKey, sortDir);
 

@@ -14,24 +14,25 @@ export async function getResourcesByBdcId(bdcId: string): Promise<RessourceDpl[]
   return rows as unknown as RessourceDpl[];
 }
 
+const RESOURCE_ALLOWED_KEYS = [
+  'gdc_catalogRef', 'gdc_categoryId', 'gdc_serviceId', 'gdc_productName',
+  'gdc_productName_update', 'gdc_contractId',
+  'gdc_id_product', 'gdc_itemStatus', 'gdc_hidden', 'id_site_sophia_go', 'gdc_concernedSiteId', 'code_produit',
+] as const;
+
 export async function updateResource(
   id: string,
-  fields: Record<string, any>
+  fields: Record<string, unknown>
 ): Promise<void> {
   const pool = getDbPool();
-  const allowedKeys = [
-    'gdc_catalogRef', 'gdc_categoryId', 'gdc_serviceId', 'gdc_productName',
-    'gdc_productName_update', 'gdc_contractId',
-    'gdc_id_product', 'gdc_itemStatus', 'gdc_hidden', 'id_site_sophia_go', 'gdc_concernedSiteId', 'code_produit',
-  ];
 
   const sets: string[] = [];
-  const values: any[] = [];
+  const values: (string | number | null)[] = [];
 
   for (const [key, val] of Object.entries(fields)) {
-    if (allowedKeys.includes(key) && val !== undefined) {
+    if ((RESOURCE_ALLOWED_KEYS as readonly string[]).includes(key) && val !== undefined) {
       sets.push(`${key} = ?`);
-      values.push(val);
+      values.push(val as string | number | null);
     }
   }
 
