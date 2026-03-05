@@ -45,10 +45,10 @@ export async function getBdcList(
     FROM bon_de_commande b
     WHERE ${where}
     ORDER BY b.cree_le DESC
-    LIMIT ? OFFSET ?
+    LIMIT ${safePageSize} OFFSET ${offset}
   `;
 
-  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, [...searchParams, safePageSize, offset]);
+  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, searchParams);
   return { data: rows as unknown as BonDeCommande[], total };
 }
 

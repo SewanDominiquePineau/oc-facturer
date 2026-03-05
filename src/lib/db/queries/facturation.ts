@@ -101,10 +101,10 @@ export async function getFacturationResources(
     LEFT JOIN bon_de_commande b_ann ON b_ann.id_bon_de_commande = va.id_bon_annule
     WHERE ${where}
     ORDER BY ${sortKey && SORTABLE_COLUMNS[sortKey] ? `${SORTABLE_COLUMNS[sortKey]} ${sortDir === 'asc' ? 'ASC' : 'DESC'}` : `${dateColumn} DESC`}
-    LIMIT ? OFFSET ?
+    LIMIT ${safePageSize} OFFSET ${offset}
   `;
 
-  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, [...searchParams, safePageSize, offset]);
+  const [rows] = await pool.execute<RowDataPacket[]>(dataQuery, searchParams);
   return { data: rows, total };
 }
 
