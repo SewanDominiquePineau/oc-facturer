@@ -8,7 +8,7 @@ import {
   updateUserAccesAdmin,
   updateUserPassword,
 } from '@/lib/db/queries/users';
-import { validatePassword } from '@/lib/validation';
+import { validateId, validatePassword, safeJson } from '@/lib/validation';
 
 export async function GET(
   request: NextRequest,
@@ -16,6 +16,9 @@ export async function GET(
 ) {
   const auth = requireAdmin(request);
   if (auth instanceof NextResponse) return auth;
+
+  const invalid = validateId(params.id);
+  if (invalid) return invalid;
 
   try {
     const user = await getUserById(params.id);
@@ -44,8 +47,14 @@ export async function PATCH(
   const auth = requireAdmin(request);
   if (auth instanceof NextResponse) return auth;
 
+  const invalid = validateId(params.id);
+  if (invalid) return invalid;
+
   try {
-    const body = await request.json();
+    const body = await safeJson(request);
+    if (body instanceof NextResponse) return body;
+
+    const data = body as Record<string, unknown>;
     const user = await getUserById(params.id);
     if (!user) {
       return NextResponse.json(
@@ -54,27 +63,27 @@ export async function PATCH(
       );
     }
 
-    if (body.actif !== undefined) {
-      const actif = body.actif === true || body.actif === 1 || body.actif === '1';
+    if (data.actif !== undefined) {
+      const actif = data.actif === true || data.actif === 1 || data.actif === '1';
       await updateUserActif(params.id, actif);
     }
-    if (body.accesAdv !== undefined) {
-      const accesAdv = body.accesAdv === true || body.accesAdv === 1 || body.accesAdv === '1';
+    if (data.accesAdv !== undefined) {
+      const accesAdv = data.accesAdv === true || data.accesAdv === 1 || data.accesAdv === '1';
       await updateUserAccesAdv(params.id, accesAdv);
     }
-    if (body.accesAdmin !== undefined) {
-      const accesAdmin = body.accesAdmin === true || body.accesAdmin === 1 || body.accesAdmin === '1';
+    if (data.accesAdmin !== undefined) {
+      const accesAdmin = data.accesAdmin === true || data.accesAdmin === 1 || data.accesAdmin === '1';
       await updateUserAccesAdmin(params.id, accesAdmin);
     }
-    if (body.password) {
-      const pwdCheck = validatePassword(body.password);
+    if (typeof data.password === 'string' && data.password) {
+      const pwdCheck = validatePassword(data.password);
       if (!pwdCheck.valid) {
         return NextResponse.json(
           { success: false, message: `Mot de passe invalide: ${pwdCheck.errors.join(', ')}` },
           { status: 400 }
         );
       }
-      const hash = await bcrypt.hash(body.password, 10);
+      const hash = await bcrypt.hash(data.password, 10);
       await updateUserPassword(params.id, hash);
     }
 

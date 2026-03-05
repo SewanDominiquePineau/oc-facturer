@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSophiaClient } from '@/lib/sophia/client';
 import { GET_ORGANIZATIONS_CHILDREN } from '@/lib/sophia/queries';
 import { requireAuth } from '@/lib/auth/middleware';
+import { validateId } from '@/lib/validation';
 
 export async function GET(
   request: NextRequest,
@@ -9,6 +10,9 @@ export async function GET(
 ) {
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
+
+  const invalid = validateId(params.id);
+  if (invalid) return invalid;
 
   try {
     const client = getSophiaClient();
@@ -22,7 +26,7 @@ export async function GET(
   } catch (error) {
     console.error(`GET /api/sophia/organizations/${params.id}/children error:`, error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

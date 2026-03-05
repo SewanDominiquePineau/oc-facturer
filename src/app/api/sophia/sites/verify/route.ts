@@ -3,6 +3,7 @@ import { getSophiaClient } from '@/lib/sophia/client';
 import { CHECK_SITE_IN_CONTRACT } from '@/lib/sophia/queries';
 import { requireAuth } from '@/lib/auth/middleware';
 import { getDbPool } from '@/lib/db/connection';
+import { isValidUUID } from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
   const user = requireAuth(request);
@@ -16,6 +17,13 @@ export async function GET(request: NextRequest) {
     if (!siteId || !contractId) {
       return NextResponse.json(
         { success: false, message: 'siteId et contractId requis' },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidUUID(siteId) || !isValidUUID(contractId)) {
+      return NextResponse.json(
+        { success: false, message: 'siteId et contractId doivent être des UUID valides' },
         { status: 400 }
       );
     }
@@ -65,7 +73,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET /api/sophia/sites/verify error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFacturationResources } from '@/lib/db/queries/facturation';
 import { requireAuth } from '@/lib/auth/middleware';
+import { safePagination } from '@/lib/validation';
+
+const VALID_TABS = ['cmes', 'fac_anticipees'] as const;
+const VALID_FILTERS = ['tous', 'a_facturer', 'masquees', 'dans_gdc'] as const;
 
 export async function GET(request: NextRequest) {
   const user = requireAuth(request);
@@ -8,11 +12,16 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = request.nextUrl;
-    const tab = (searchParams.get('tab') || 'cmes') as 'cmes' | 'fac_anticipees';
-    const filter = (searchParams.get('filter') || 'tous') as 'tous' | 'a_facturer' | 'masquees' | 'dans_gdc';
+    const rawTab = searchParams.get('tab') || 'cmes';
+    const tab = VALID_TABS.includes(rawTab as typeof VALID_TABS[number])
+      ? (rawTab as typeof VALID_TABS[number])
+      : 'cmes';
+    const rawFilter = searchParams.get('filter') || 'tous';
+    const filter = VALID_FILTERS.includes(rawFilter as typeof VALID_FILTERS[number])
+      ? (rawFilter as typeof VALID_FILTERS[number])
+      : 'tous';
     const search = searchParams.get('search') || undefined;
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50', 10)));
+    const { page, pageSize } = safePagination(searchParams);
     const sortKey = searchParams.get('sortKey') || undefined;
     const sortDir = (searchParams.get('sortDir') || 'asc') as 'asc' | 'desc';
 
@@ -29,7 +38,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET /api/bdc/facturation error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

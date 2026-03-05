@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBdcById, updateBdc } from '@/lib/db/queries/bdc';
 import { requireAuth } from '@/lib/auth/middleware';
+import { validateId, safeJson } from '@/lib/validation';
 
 export async function GET(
   request: NextRequest,
@@ -8,6 +9,9 @@ export async function GET(
 ) {
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
+
+  const invalid = validateId(params.id);
+  if (invalid) return invalid;
 
   try {
     const bdc = await getBdcById(params.id);
@@ -18,7 +22,7 @@ export async function GET(
   } catch (error) {
     console.error(`GET /api/bdc/${params.id} error:`, error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }
@@ -31,16 +35,22 @@ export async function PATCH(
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
 
+  const invalid = validateId(params.id);
+  if (invalid) return invalid;
+
   try {
-    const body = await request.json();
+    const body = await safeJson(request);
+    if (body instanceof NextResponse) return body;
 
     const allowedFields = [
       'gdc_contractId', 'gdc_contractName',
-      'gdc_invoicedEntityId', 'gdc_invoicedEntityName', 'ajout_gdc',
+      'gdc_invoicedEntityId', 'gdc_invoicedEntityName',
+      'id_sophia_go_facturation', 'nom_sophia_facturation',
+      'ajout_gdc',
     ];
-    const fields: Record<string, any> = {};
+    const fields: Record<string, unknown> = {};
     for (const key of allowedFields) {
-      if (body[key] !== undefined) fields[key] = body[key];
+      if ((body as Record<string, unknown>)[key] !== undefined) fields[key] = (body as Record<string, unknown>)[key];
     }
 
     await updateBdc(params.id, fields);
@@ -50,7 +60,7 @@ export async function PATCH(
   } catch (error) {
     console.error(`PATCH /api/bdc/${params.id} error:`, error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

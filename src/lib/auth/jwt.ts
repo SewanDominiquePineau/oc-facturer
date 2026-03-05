@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import type { JwtPayload } from './types';
 
+const ALGORITHM = 'HS256' as const;
+
 function getAccessSecret(): string {
   const s = process.env.JWT_SECRET;
   if (!s) throw new Error('JWT_SECRET environment variable is not set');
@@ -14,17 +16,17 @@ function getRefreshSecret(): string {
 }
 
 export function signAccessToken(payload: JwtPayload): string {
-  return jwt.sign(payload, getAccessSecret(), { expiresIn: '1h' });
+  return jwt.sign(payload, getAccessSecret(), { expiresIn: '1h', algorithm: ALGORITHM });
 }
 
 export function signRefreshToken(userId: string): string {
-  return jwt.sign({ userId }, getRefreshSecret(), { expiresIn: '7d' });
+  return jwt.sign({ userId }, getRefreshSecret(), { expiresIn: '7d', algorithm: ALGORITHM });
 }
 
 export function verifyAccessToken(token: string): JwtPayload {
-  return jwt.verify(token, getAccessSecret()) as JwtPayload;
+  return jwt.verify(token, getAccessSecret(), { algorithms: [ALGORITHM] }) as JwtPayload;
 }
 
 export function verifyRefreshToken(token: string): { userId: string } {
-  return jwt.verify(token, getRefreshSecret()) as { userId: string };
+  return jwt.verify(token, getRefreshSecret(), { algorithms: [ALGORITHM] }) as { userId: string };
 }

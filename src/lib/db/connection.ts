@@ -4,8 +4,17 @@ const globalForDb = globalThis as unknown as {
   dbPool: mysql.Pool | undefined;
 };
 
+function validateDbEnv() {
+  const required = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'];
+  const missing = required.filter(k => !process.env[k]);
+  if (missing.length > 0) {
+    throw new Error(`Variables d'environnement DB manquantes: ${missing.join(', ')}`);
+  }
+}
+
 export function getDbPool(): mysql.Pool {
   if (!globalForDb.dbPool) {
+    validateDbEnv();
     globalForDb.dbPool = mysql.createPool({
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT || '3306', 10),
@@ -17,6 +26,7 @@ export function getDbPool(): mysql.Pool {
       queueLimit: 0,
       enableKeepAlive: true,
       keepAliveInitialDelay: 0,
+      charset: 'utf8mb4',
     });
   }
   return globalForDb.dbPool;

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBdcList } from '@/lib/db/queries/bdc';
 import { requireAuth } from '@/lib/auth/middleware';
+import { safePagination } from '@/lib/validation';
+
+const VALID_FILTERS = ['all', 'sans_contrat', 'plus_1mois', 'enregistre'] as const;
+type BdcFilter = (typeof VALID_FILTERS)[number];
 
 export async function GET(request: NextRequest) {
   const user = requireAuth(request);
@@ -8,10 +12,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = request.nextUrl;
-    const filter = (searchParams.get('filter') || 'all') as 'all' | 'sans_contrat' | 'plus_1mois' | 'enregistre';
+    const rawFilter = searchParams.get('filter') || 'all';
+    const filter: BdcFilter = VALID_FILTERS.includes(rawFilter as BdcFilter)
+      ? (rawFilter as BdcFilter)
+      : 'all';
     const search = searchParams.get('search') || undefined;
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50', 10)));
+    const { page, pageSize } = safePagination(searchParams);
 
     const { data, total } = await getBdcList(filter, search, page, pageSize);
 
@@ -26,7 +32,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET /api/bdc error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

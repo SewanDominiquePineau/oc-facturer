@@ -16,7 +16,7 @@ export async function getBdcList(
 
   switch (filter) {
     case 'sans_contrat':
-      where += ` AND (b.gdc_contractId IS NULL OR b.gdc_contractId = '')`;
+      where += ` AND (b.gdc_contractId IS NULL OR b.gdc_contractId = '') AND (b.ajout_gdc IS NULL OR b.ajout_gdc != 1)`;
       break;
     case 'plus_1mois':
       where += ` AND b.cree_le < DATE_SUB(NOW(), INTERVAL 1 MONTH)`;
@@ -60,16 +60,23 @@ export async function getBdcById(id: string): Promise<BonDeCommande | null> {
   return (rows[0] as unknown as BonDeCommande) ?? null;
 }
 
+const BDC_ALLOWED_FIELDS = new Set([
+  'gdc_contractId', 'gdc_contractName',
+  'gdc_invoicedEntityId', 'gdc_invoicedEntityName',
+  'id_sophia_go_facturation', 'nom_sophia_facturation',
+  'ajout_gdc',
+]);
+
 export async function updateBdc(
   id: string,
-  fields: Partial<Pick<BonDeCommande, 'gdc_contractId' | 'gdc_contractName' | 'gdc_invoicedEntityId' | 'gdc_invoicedEntityName' | 'ajout_gdc'>>
+  fields: Record<string, any>
 ): Promise<void> {
   const pool = getDbPool();
   const sets: string[] = [];
   const values: any[] = [];
 
   for (const [key, val] of Object.entries(fields)) {
-    if (val !== undefined) {
+    if (val !== undefined && BDC_ALLOWED_FIELDS.has(key)) {
       sets.push(`${key} = ?`);
       values.push(val);
     }

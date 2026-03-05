@@ -3,19 +3,21 @@ import { getSophiaClient } from '@/lib/sophia/client';
 import { UPDATE_ARTICLE } from '@/lib/sophia/mutations';
 import { GET_ARTICLE } from '@/lib/sophia/queries';
 import { requireAuth } from '@/lib/auth/middleware';
+import { validateId, safeJson } from '@/lib/validation';
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
 
-  try {
-    const { id } = await context.params;
-    const client = getSophiaClient();
+  const invalid = validateId(params.id);
+  if (invalid) return invalid;
 
-    const result = await client.executeGraphQL(GET_ARTICLE, { id });
+  try {
+    const client = getSophiaClient();
+    const result = await client.executeGraphQL(GET_ARTICLE, { id: params.id });
 
     return NextResponse.json({
       success: true,
@@ -24,7 +26,7 @@ export async function GET(
   } catch (error) {
     console.error('GET /api/sophia/articles/[id] error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }
@@ -32,19 +34,22 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const user = requireAuth(request);
   if (user instanceof NextResponse) return user;
 
-  try {
-    const { id } = await context.params;
-    const body = await request.json();
-    const client = getSophiaClient();
+  const invalid = validateId(params.id);
+  if (invalid) return invalid;
 
+  try {
+    const body = await safeJson(request);
+    if (body instanceof NextResponse) return body;
+
+    const client = getSophiaClient();
     const result = await client.executeGraphQL(UPDATE_ARTICLE, {
-      id,
-      article: body.article,
+      id: params.id,
+      article: (body as Record<string, unknown>).article,
     });
 
     return NextResponse.json({
@@ -54,7 +59,7 @@ export async function PATCH(
   } catch (error) {
     console.error('PATCH /api/sophia/articles/[id] error:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

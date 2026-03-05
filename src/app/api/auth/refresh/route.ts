@@ -1,13 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserById } from '@/lib/db/queries/users';
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from '@/lib/auth/jwt';
+import { checkRateLimit } from '@/lib/auth/rate-limit';
 import type { JwtPayload } from '@/lib/auth/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { refreshToken } = await request.json();
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rlKey = `refresh:${ip}`;
+    const { allowed, retryAfterMs } = checkRateLimit(rlKey, 20, 5 * 60 * 1000);
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, message: 'Trop de requêtes' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil(retryAfterMs / 1000)) } }
+      );
+    }
 
-    if (!refreshToken) {
+    let body: { refreshToken?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, message: 'Corps JSON invalide' },
+        { status: 400 }
+      );
+    }
+
+    if (!body.refreshToken) {
       return NextResponse.json(
         { success: false, message: 'Refresh token requis' },
         { status: 400 }
@@ -16,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     let decoded: { userId: string };
     try {
-      decoded = verifyRefreshToken(refreshToken);
+      decoded = verifyRefreshToken(body.refreshToken);
     } catch {
       return NextResponse.json(
         { success: false, message: 'Refresh token invalide ou expiré' },

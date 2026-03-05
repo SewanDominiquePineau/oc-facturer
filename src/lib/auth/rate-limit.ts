@@ -5,8 +5,8 @@ interface RateLimitEntry {
 
 const store = new Map<string, RateLimitEntry>();
 
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const MAX_ATTEMPTS = 5;
+const DEFAULT_WINDOW_MS = 15 * 60 * 1000;
+const DEFAULT_MAX_ATTEMPTS = 5;
 
 setInterval(() => {
   const now = Date.now();
@@ -15,21 +15,25 @@ setInterval(() => {
   });
 }, 60_000);
 
-export function checkRateLimit(key: string): { allowed: boolean; remaining: number; retryAfterMs: number } {
+export function checkRateLimit(
+  key: string,
+  maxAttempts = DEFAULT_MAX_ATTEMPTS,
+  windowMs = DEFAULT_WINDOW_MS
+): { allowed: boolean; remaining: number; retryAfterMs: number } {
   const now = Date.now();
   const entry = store.get(key);
 
   if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, remaining: MAX_ATTEMPTS - 1, retryAfterMs: 0 };
+    store.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, remaining: maxAttempts - 1, retryAfterMs: 0 };
   }
 
   entry.count++;
-  if (entry.count > MAX_ATTEMPTS) {
+  if (entry.count > maxAttempts) {
     return { allowed: false, remaining: 0, retryAfterMs: entry.resetAt - now };
   }
 
-  return { allowed: true, remaining: MAX_ATTEMPTS - entry.count, retryAfterMs: 0 };
+  return { allowed: true, remaining: maxAttempts - entry.count, retryAfterMs: 0 };
 }
 
 export function resetRateLimit(key: string): void {

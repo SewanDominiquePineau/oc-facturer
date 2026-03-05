@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const data = await getFacturationStats();
-    return NextResponse.json({ success: true, ...data });
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('GET /api/bdc/facturation/stats error:', error);
     return NextResponse.json(

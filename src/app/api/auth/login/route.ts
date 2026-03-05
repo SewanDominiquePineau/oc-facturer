@@ -3,11 +3,14 @@ import bcrypt from 'bcrypt';
 import { getUserByEmail, updateLastLogin } from '@/lib/db/queries/users';
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt';
 import { checkRateLimit, resetRateLimit } from '@/lib/auth/rate-limit';
+import { safeJson } from '@/lib/validation';
 import type { JwtPayload } from '@/lib/auth/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const body = await safeJson<{ email?: string; password?: string }>(request);
+    if (body instanceof NextResponse) return body;
+    const { email, password } = body;
 
     if (!email || !password) {
       return NextResponse.json(
@@ -36,8 +39,8 @@ export async function POST(request: NextRequest) {
 
     if (!user.actif) {
       return NextResponse.json(
-        { success: false, message: 'Compte desactive' },
-        { status: 403 }
+        { success: false, message: 'Identifiants incorrects' },
+        { status: 401 }
       );
     }
 
