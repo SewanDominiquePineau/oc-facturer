@@ -28,3 +28,16 @@ export async function getLastBdcWithContractForClient(
   );
   return (rows[0] as RowDataPacket & { gdc_contractId: string; gdc_contractName: string; gdc_invoicedEntityId: string; gdc_invoicedEntityName: string } | undefined) ?? null;
 }
+
+export async function getClientOrgIds(dynamicsAccountId: string): Promise<string[]> {
+  const pool = getDbPool();
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `SELECT DISTINCT gdc_invoicedEntityId
+     FROM bon_de_commande
+     WHERE dynamics_account_id = ?
+       AND gdc_invoicedEntityId IS NOT NULL AND gdc_invoicedEntityId != ''
+     LIMIT 10`,
+    [dynamicsAccountId]
+  );
+  return (rows as Array<{ gdc_invoicedEntityId: string }>).map(r => r.gdc_invoicedEntityId);
+}
