@@ -71,6 +71,7 @@ export async function getFacturationResources(
     SELECT r.*, b.numero_bdc, b.per_name, b.gdc_contractId as bdc_gdc_contractId,
            b.gdc_contractName as bdc_gdc_contractName, b.gdc_invoicedEntityId as bdc_gdc_invoicedEntityId,
            b.gdc_invoicedEntityName as bdc_gdc_invoicedEntityName,
+           b.dynamics_account_id,
            b.date_annulation as bdc_date_annulation,
            b.file_name as bdc_file_name, b.opportunite_path as bdc_opportunite_path,
            COALESCE(s.site_nom_sophia, s2.site_nom_sophia) as site_site_nom_sophia,
