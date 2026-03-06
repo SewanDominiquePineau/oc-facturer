@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     const client = getSophiaClient();
 
     // Try each candidate orgId, keep the one with the most results
-    let bestData: SitesResult['site'] extends infer T ? T extends { getSites?: infer U } ? U : null : null = null;
+    let bestData: { edges?: unknown[]; pageInfo?: { count?: number } } | null = null;
     let bestCount = 0;
 
     for (const orgId of candidateOrgIds) {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         const data = await searchSites(client, orgId, search, page, limit);
         const count = data?.pageInfo?.count || 0;
         if (count > bestCount) {
-          bestData = data;
+          bestData = data ?? null;
           bestCount = count;
           if (count > 10) break; // Good enough, stop searching
         }
