@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSophiaClient } from '@/lib/sophia/client';
 import { SEARCH_PRODUCTS } from '@/lib/sophia/queries';
-import { transformProductCode } from '@/lib/sophia/transform';
+import { getProductCodeVariants } from '@/lib/sophia/transform';
 import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(
@@ -21,25 +21,35 @@ export async function GET(
       );
     }
 
-    const transformedCode = transformProductCode(productCode);
+    const variants = getProductCodeVariants(productCode);
     const client = getSophiaClient();
 
     const organizationId = process.env.SOPHIA_ORGANIZATION_ID;
     if (!organizationId) return NextResponse.json({ success: false, message: 'Configuration serveur manquante' }, { status: 500 });
 
-    const result = await client.executeGraphQL<{ contract?: { searchProducts?: unknown[] } }>(SEARCH_PRODUCTS, {
-      organizationId,
-      search: transformedCode,
-    });
+    // Essayer chaque variante, s'arreter des qu'on a des resultats
+    let products: unknown[] = [];
+    let usedVariant = variants[0];
 
-    const products = result?.contract?.searchProducts || [];
+    for (const variant of variants) {
+      const result = await client.executeGraphQL<{ contract?: { searchProducts?: unknown[] } }>(SEARCH_PRODUCTS, {
+        organizationId,
+        search: variant,
+      });
+      const found = result?.contract?.searchProducts || [];
+      if (found.length > 0) {
+        products = found;
+        usedVariant = variant;
+        break;
+      }
+    }
 
     return NextResponse.json({
       success: true,
       data: products,
       count: products.length,
       originalCode: productCode,
-      transformedCode,
+      transformedCode: usedVariant,
     });
   } catch (error: unknown) {
     console.error('GET /api/sophia/products/search/[code] error:', error);
